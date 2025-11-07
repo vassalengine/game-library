@@ -1,4 +1,5 @@
 .*.swp
 config.toml
 projects.db
+users.db
 target/

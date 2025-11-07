@@ -1,0 +1,11 @@
+db_path = "users.db"
+access_key = ""
+access_key_ttl = 28800
+refresh_ttl = 28800
+api_base_path = "/api/v1"
+listen_ip = "0.0.0.0"
+listen_port = 4000
+discourse_url = "https://forum.vassalengine.org"
+discourse_sso_secret = ""
+discourse_update_secret = ""
+log_headers = false
