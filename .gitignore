@@ -1,5 +1,7 @@
 .*.swp
 config.toml
-projects.db
-users.db
-target/
+/game-library-frontend/site/project.html
+/game-library-frontent/site/projects.html
+/game-library-service/projects.db
+/target
+/user-management-service/users.db
