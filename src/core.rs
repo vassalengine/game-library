@@ -8,7 +8,7 @@ use thiserror::Error;
 
 use crate::{
     errors::{AppError, RequestError},
-    model::{UserData, UserUpdateParams}
+    model::UserUpdateParams
 };
 
 #[derive(Debug, Error)]
@@ -64,13 +64,6 @@ pub trait Core {
         _username: &str,
         _size: u32
     ) -> Result<String, CoreError> {
-        unimplemented!();
-    }
-
-    async fn get_user_data(
-        &self,
-        _uids: &[i64]
-    ) -> Result<Vec<UserData>, CoreError> {
         unimplemented!();
     }
 

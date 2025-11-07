@@ -13,7 +13,7 @@ use crate::{
     },
     errors::AppError,
     jwt::{self, EncodingKey},
-    model::{UserData, UserUpdateParams},
+    model::UserUpdateParams,
     search::user_search
 };
 
@@ -83,13 +83,6 @@ impl<C: DatabaseClient + Send + Sync> Core for ProdCore<C> {
         );
 
         Ok(avatar_url)
-    }
-
-    async fn get_user_data(
-        &self,
-        uids: &[i64]
-    ) -> Result<Vec<UserData>, CoreError> {
-        Ok(self.db.get_user_data(uids).await?)
     }
 
     fn build_sso_request(
