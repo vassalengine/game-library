@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct LoginParams {
@@ -51,4 +52,20 @@ pub struct UserUpdateParams {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct UserUpdatePost {
     pub user: UserUpdateParams
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct UserDataPost {
+    pub ids: Vec<u32>
+}
+
+#[derive(Debug, Deserialize, Eq, FromRow, PartialEq, Serialize)]
+pub struct UserData {
+    pub id: i64,
+    pub username: String
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct UserDataResponse {
+    pub users: Vec<UserData>
 }

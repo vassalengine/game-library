@@ -10,7 +10,7 @@ use crate::{
     core::CoreArc,
     errors::AppError,
     extractors::{DiscourseEvent, User},
-    model::{LoginParams, LoginResponse, RefreshResponse, SsoLoginParams, SsoLoginResponseParams, SsoLogoutResponseParams, UserSearchParams, UserUpdatePost}
+    model::{LoginParams, LoginResponse, RefreshResponse, SsoLoginParams, SsoLoginResponseParams, SsoLogoutResponseParams, UserSearchParams, UserUpdatePost, UserDataPost, UserDataResponse}
 };
 
 pub async fn root_get() -> &'static str {
@@ -171,6 +171,16 @@ pub async fn sso_user_event_post(
 ) -> Result<(), AppError>
 {
     Ok(core.update_user(&data.user).await?)
+}
+
+pub async fn userdata_post(
+    State(core): State<CoreArc>,
+    Json(data): Json<UserDataPost>
+) -> Result<Json<UserDataResponse>, AppError>
+{
+    let ids = data.ids.iter().map(|id| *id as i64).collect::<Vec<_>>();
+    let users = core.get_user_data(&ids).await?;
+    Ok(Json(UserDataResponse { users }))
 }
 
 /*

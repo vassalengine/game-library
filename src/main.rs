@@ -180,6 +180,10 @@ fn routes(api: &str, log_headers: bool) -> Router<AppState> {
         )
 // TODO: users tests
         .route(
+            &format!("{api}/userdata"),
+            post(handlers::userdata_post)
+        )
+        .route(
             &format!("{api}/users"),
             get(handlers::users_get)
         )

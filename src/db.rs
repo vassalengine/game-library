@@ -2,7 +2,7 @@ use async_trait::async_trait;
 
 use crate::{
     core::CoreError,
-    model::UserUpdateParams
+    model::{UserData, UserUpdateParams}
 };
 
 #[async_trait]
@@ -11,6 +11,14 @@ pub trait DatabaseClient {
         &self,
         _username: &str
     ) -> Result<String, CoreError>
+    {
+        unimplemented!();
+    }
+
+    async fn get_user_data(
+        &self,
+        _uids: &[i64]
+    ) -> Result<Vec<UserData>, CoreError>
     {
         unimplemented!();
     }

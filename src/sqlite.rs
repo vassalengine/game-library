@@ -1,13 +1,13 @@
 use async_trait::async_trait;
 use sqlx::{
-    Database, Executor,
+    Database, Executor, QueryBuilder,
     sqlite::Sqlite
 };
 
 use crate::{
     core::CoreError,
     db::DatabaseClient,
-    model::UserUpdateParams
+    model::{UserData, UserUpdateParams}
 };
 
 #[derive(Clone)]
@@ -21,6 +21,14 @@ impl DatabaseClient for SqlxDatabaseClient<Sqlite> {
     ) -> Result<String, CoreError>
     {
         get_user_avatar_template(&self.0, username).await
+    }
+
+    async fn get_user_data(
+        &self,
+        uids: &[i64]
+    ) -> Result<Vec<UserData>, CoreError>
+    {
+        get_user_data(&self.0, uids).await
     }
 
     async fn update_user(
@@ -77,6 +85,31 @@ WHERE username = ?
         )
         .fetch_one(ex)
         .await?
+    )
+}
+
+async fn get_user_data<'e, E>(
+    ex: E,
+    uids: &[i64]
+) -> Result<Vec<UserData>, CoreError>
+where
+    E: Executor<'e, Database = Sqlite>
+{
+    let mut qb: QueryBuilder<E::Database> = QueryBuilder::new(
+        "SELECT user_id AS id, username FROM users WHERE user_id IN ("
+    );
+
+    let mut qbs = qb.separated(", ");
+
+    for uid in uids {
+        qbs.push_bind(uid);
+    }
+
+    Ok(
+        qb.push(") ORDER BY user_id")
+            .build_query_as::<UserData>()
+            .fetch_all(ex)
+            .await?
     )
 }
 
@@ -176,4 +209,53 @@ WHERE session_id = ?
     .await?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    type Pool = sqlx::Pool<Sqlite>;
+
+    #[sqlx::test(fixtures("users"))]
+    async fn get_user_data_none(pool: Pool) {
+        assert_eq!(
+            get_user_data(&pool, &[0]).await.unwrap(),
+            []
+        );
+    }
+
+
+    #[sqlx::test(fixtures("users"))]
+    async fn get_user_data_one(pool: Pool) {
+        assert_eq!(
+            get_user_data(&pool, &[1]).await.unwrap(),
+            [
+                UserData{ id: 1, username: "alice".into() }
+            ]
+        );
+    }
+
+    #[sqlx::test(fixtures("users"))]
+    async fn get_user_data_two(pool: Pool) {
+        assert_eq!(
+            get_user_data(&pool, &[1, 2]).await.unwrap(),
+            [
+                UserData{ id: 1, username: "alice".into() },
+                UserData{ id: 2, username: "bob".into() }
+            ]
+        );
+    }
+
+    #[sqlx::test(fixtures("users"))]
+    async fn get_user_data_many(pool: Pool) {
+        let ids = (0..10000).collect::<Vec<_>>();
+        assert_eq!(
+            get_user_data(&pool, &ids).await.unwrap(),
+            [
+                UserData{ id: 1, username: "alice".into() },
+                UserData{ id: 2, username: "bob".into() }
+            ]
+       );
+    }
 }
