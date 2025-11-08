@@ -9,7 +9,10 @@ use axum::{
 };
 use bytes::{Buf, Bytes};
 use futures::future;
-use glc::model::{ProjectData, Users};
+use glc::{
+    model::{ProjectData, Users},
+    server::real_addr
+};
 use http::header::{CACHE_CONTROL, HeaderValue};
 use mime::APPLICATION_JSON;
 use reqwest::{
@@ -46,19 +49,6 @@ use tracing_subscriber::{
 
 const SITE_DIR: &str = "../../../site";
 const DIST_DIR: &str = "app/dist";
-
-fn real_addr(request: &Request) -> String {
-    // If we're behind a proxy, get IP from X-Forwarded-For header
-    match request.headers().get("x-forwarded-for") {
-        Some(addr) => addr.to_str()
-            .map(String::from)
-            .ok(),
-        None => request.extensions()
-            .get::<ConnectInfo<SocketAddr>>()
-            .map(|info| info.ip().to_string())
-    }
-    .unwrap_or_else(|| "<unknown>".into())
-}
 
 #[derive(Clone, Debug)]
 struct SpanMaker {

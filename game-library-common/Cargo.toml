@@ -7,6 +7,7 @@ license = "GPL-3.0-or-later"
 edition = "2024"
 
 [dependencies]
+axum = { version = "0.8", features = ["http1", "http2", "json", "macros", "multipart", "query", "tokio"] }
 serde = { version = "1", features = ["derive"] }
 thiserror = "2.0"
 urlencoding = "2.1.3"

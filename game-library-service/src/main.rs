@@ -10,6 +10,7 @@ use axum::{
 };
 use chrono::Utc;
 use futures_util::future::try_join_all;
+use glc::server::real_addr;
 use serde::{Deserialize, Serialize};
 use sqlx::sqlite::SqlitePoolOptions;
 use std::{
@@ -119,19 +120,6 @@ impl IntoResponse for AppError {
         let body = Json(HttpError::from(self));
         (code, body).into_response()
     }
-}
-
-fn real_addr(request: &Request) -> String {
-    // If we're behind a proxy, get IP from X-Forwarded-For header
-    match request.headers().get("x-forwarded-for") {
-        Some(addr) => addr.to_str()
-            .map(String::from)
-            .ok(),
-        None => request.extensions()
-            .get::<ConnectInfo<SocketAddr>>()
-            .map(|info| info.ip().to_string())
-    }
-    .unwrap_or_else(|| "<unknown>".into())
 }
 
 #[derive(Clone, Debug)]
