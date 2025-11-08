@@ -30,11 +30,6 @@ use tower_http::{
     trace::{DefaultOnFailure, DefaultOnResponse, TraceLayer}
 };
 use tracing::{error, info, warn, Level};
-use tracing_subscriber::{
-    EnvFilter,
-    layer::SubscriberExt,
-    util::SubscriberInitExt
-};
 
 mod app;
 mod config;

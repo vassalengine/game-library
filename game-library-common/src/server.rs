@@ -116,5 +116,5 @@ pub async fn setup_logging(log_base: &str) -> WorkerGuard {
     // ensure that panics are logged
     std::panic::set_hook(Box::new(panic_hook));
 
-    guard 
+    guard
 }

@@ -40,11 +40,6 @@ use tower_http::{
     trace::{DefaultOnFailure, DefaultOnResponse, TraceLayer}
 };
 use tracing::{error, info, Level};
-use tracing_subscriber::{
-    EnvFilter,
-    layer::SubscriberExt,
-    util::SubscriberInitExt
-};
 
 const SITE_DIR: &str = "../../../site";
 const DIST_DIR: &str = "app/dist";

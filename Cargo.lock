@@ -1106,9 +1106,6 @@ dependencies = [
  "tower",
  "tower-http",
  "tracing",
- "tracing-appender",
- "tracing-panic",
- "tracing-subscriber",
  "urlencoding",
 ]
 
@@ -1207,9 +1204,6 @@ dependencies = [
  "tower",
  "tower-http",
  "tracing",
- "tracing-appender",
- "tracing-panic",
- "tracing-subscriber",
  "unicode-ccc",
  "unicode-normalization",
  "unicode-properties",
@@ -3606,9 +3600,6 @@ dependencies = [
  "tower",
  "tower-http",
  "tracing",
- "tracing-appender",
- "tracing-panic",
- "tracing-subscriber",
  "urlencoding",
  "wiremock",
 ]
