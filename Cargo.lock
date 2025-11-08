@@ -1152,6 +1152,8 @@ dependencies = [
  "axum",
  "serde",
  "thiserror 2.0.17",
+ "tower-http",
+ "tracing",
  "urlencoding",
 ]
 

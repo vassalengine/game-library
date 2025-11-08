@@ -11,7 +11,7 @@ use bytes::{Buf, Bytes};
 use futures::future;
 use glc::{
     model::{ProjectData, Users},
-    server::real_addr
+    server::{real_addr, SpanMaker}
 };
 use http::header::{CACHE_CONTROL, HeaderValue};
 use mime::APPLICATION_JSON;
@@ -37,9 +37,9 @@ use tower_http::{
     services::{ServeDir, ServeFile},
     set_header::SetResponseHeaderLayer,
     timeout::TimeoutLayer,
-    trace::{DefaultOnFailure, DefaultOnResponse, MakeSpan, TraceLayer}
+    trace::{DefaultOnFailure, DefaultOnResponse, TraceLayer}
 };
-use tracing::{error, info, info_span, Level, Span};
+use tracing::{error, info, Level};
 use tracing_panic::panic_hook;
 use tracing_subscriber::{
     EnvFilter,
@@ -49,46 +49,6 @@ use tracing_subscriber::{
 
 const SITE_DIR: &str = "../../../site";
 const DIST_DIR: &str = "app/dist";
-
-#[derive(Clone, Debug)]
-struct SpanMaker {
-    include_headers: bool
-}
-
-impl SpanMaker {
-    pub fn new() -> Self {
-        Self { include_headers: false }
-    }
-
-    pub fn include_headers(mut self, include_headers: bool) -> Self {
-        self.include_headers = include_headers;
-        self
-    }
-}
-
-impl MakeSpan<Body> for SpanMaker {
-    fn make_span(&mut self, request: &Request<Body>) -> Span {
-        if self.include_headers {
-            info_span!(
-                "request",
-                source = %real_addr(request),
-                method = %request.method(),
-                uri = %request.uri(),
-                version = ?request.version(),
-                headers = ?request.headers()
-            )
-        }
-        else {
-            info_span!(
-                "request",
-                source = %real_addr(request),
-                method = %request.method(),
-                uri = %request.uri(),
-                version = ?request.version()
-            )
-        }
-    }
-}
 
 #[derive(Debug, thiserror::Error)]
 enum StartupError {

@@ -10,4 +10,6 @@ edition = "2024"
 axum = { version = "0.8", features = ["http1", "http2", "json", "macros", "multipart", "query", "tokio"] }
 serde = { version = "1", features = ["derive"] }
 thiserror = "2.0"
+tower-http = { version = "0.6", features = ["compression-br", "compression-deflate", "compression-gzip", "compression-zstd", "cors", "fs", "timeout", "trace"] }
+tracing = "0.1"
 urlencoding = "2.1.3"
