@@ -1,3 +1,8 @@
 [workspace]
 resolver = "3"
-members = ["game-library-frontend", "game-library-service", "user-management-service"]
+members = [
+  "game-library-common",
+  "game-library-frontend",
+  "game-library-service",
+  "user-management-service"
+]

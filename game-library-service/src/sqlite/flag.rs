@@ -1,3 +1,4 @@
+use glc::model::FlagTag;
 use sqlx::{
     Executor,
     sqlite::Sqlite
@@ -5,9 +6,9 @@ use sqlx::{
 
 use crate::{
     db::{DatabaseError, FlagRow},
-    sqlite::require_one_modified,
     input::FlagPost,
-    model::{Admin, Flag, FlagTag, Project, User}
+    model::{Admin, Flag, Project, User},
+    sqlite::require_one_modified
 };
 
 impl<'a> From<&'a FlagPost> for (u32, Option<&'a str>) {
@@ -21,13 +22,35 @@ impl<'a> From<&'a FlagPost> for (u32, Option<&'a str>) {
     }
 }
 
-impl From<i64> for FlagTag {
-    fn from(f: i64) -> Self {
-        match f {
-            0 => FlagTag::Inappropriate,
-            1 => FlagTag::Spam,
-            2 => FlagTag::Illegal,
-            _ => FlagTag::Other
+fn flag_tag(f: i64) -> FlagTag {
+    match f {
+        0 => FlagTag::Inappropriate,
+        1 => FlagTag::Spam,
+        2 => FlagTag::Illegal,
+         _ => FlagTag::Other
+    }
+}
+
+struct RawFlagRow {
+    pub flag_id: i64,
+    pub project: String,
+    pub slug: String,
+    pub flag: i64,
+    pub flagged_at: i64,
+    pub flagged_by: String,
+    pub message: Option<String>
+}
+
+impl From<RawFlagRow> for FlagRow {
+    fn from(r: RawFlagRow) -> Self {
+        Self {
+           flag_id: r.flag_id,
+           project: r.project,
+           slug: r.slug,
+           flag: flag_tag(r.flag),
+           flagged_at: r.flagged_at,
+           flagged_by: r.flagged_by,
+           message: r.message
         }
     }
 }
@@ -98,7 +121,7 @@ where
 {
     Ok(
         sqlx::query_as!(
-            FlagRow,
+            RawFlagRow,
             "
 SELECT
     flags.flag_id,
@@ -119,6 +142,9 @@ ORDER BY flags.flag_id
         )
         .fetch_all(ex)
         .await?
+        .into_iter()
+        .map(FlagRow::from)
+        .collect()
     )
 }
 

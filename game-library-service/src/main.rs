@@ -48,7 +48,6 @@ mod input;
 mod jwt;
 mod model;
 mod module;
-mod pagination;
 mod params;
 mod prod_core;
 mod sqlite;
@@ -507,6 +506,10 @@ mod test {
         }
     };
     use futures::Stream;
+    use glc::{
+        model::{FlagData, Flags, FlagTag, GameData, FileData, PackageData, ProjectData, Projects, ProjectSummary, Range, ReleaseData, Users},
+        pagination::{Anchor, Direction, Limit, SortBy, Pagination, Seek, SeekLink}
+    };
     use mime::{APPLICATION_JSON, IMAGE_PNG, TEXT_PLAIN, Mime};
     use once_cell::sync::Lazy;
     use nix::{
@@ -521,8 +524,7 @@ mod test {
         core::{AddFileError, AddFlagError, AddImageError, AddOwnersError, AddPlayerError, CloseFlagError, Core, CreatePackageError, CreateProjectError, CreateReleaseError, DeletePackageError, DeleteReleaseError, GetFlagsError, GetIdError, GetImageError, GetOwnersError, GetPlayersError, GetProjectError, GetProjectsError, RemoveOwnersError, RemovePlayerError, UpdateGalleryError, UpdatePackageError, UpdateProjectError, UserIsOwnerError},
         input::{FlagPost, GalleryPatch, GalleryOp, GameDataPost, PackageDataPatch, PackageDataPost, ProjectDataPatch, ProjectDataPost, RangePost},
         jwt::{self, EncodingKey},
-        model::{Admin, Flag, FlagData, Flags, FlagTag, GameData, Owner, FileData, Package, PackageData, ProjectData, Project, Projects, ProjectSummary, Range, Release, ReleaseData, User, Users},
-        pagination::{Anchor, Direction, Limit, SortBy, Pagination, Seek, SeekLink},
+        model::{Admin, Flag, Owner, Package, Project, Release, User},
         params::ProjectsParams
     };
 

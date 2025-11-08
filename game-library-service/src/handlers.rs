@@ -9,6 +9,7 @@ use axum_extra::{
     headers::{ContentLength, ContentType}
 };
 use futures::{Stream, TryStreamExt};
+use glc::model::{Flags, ProjectData, Projects, Publishers, Tags, Users};
 use http_body_util::{BodyExt, Limited, LengthLimitError};
 use std::{
     error::Error,
@@ -20,7 +21,7 @@ use crate::{
     errors::AppError,
     extractors::{ProjectPackage, ProjectPackageRelease, Wrapper},
     input::{FlagPost, GalleryPatch, PackageDataPatch, PackageDataPost, ProjectDataPatch, ProjectDataPost},
-    model::{Admin, Flag, Flags, Owned, ProjectData, Project, Projects, Publishers, Tags, Users, User},
+    model::{Admin, Flag, Owned, Project, User},
     params::ProjectsParams,
 };
 

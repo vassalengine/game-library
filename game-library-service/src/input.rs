@@ -1,8 +1,7 @@
+use glc::model::FlagTag;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::{Deserialize, Deserializer, Serialize};
-
-use crate::model::FlagTag;
 
 pub trait ConsecutiveWhitespace {
     fn has_consecutive_whitespace(&self) -> bool;

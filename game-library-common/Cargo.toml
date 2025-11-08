@@ -1,0 +1,12 @@
+[package]
+name = "glc"
+version = "0.1.0"
+authors = ["Joel Uckelman <uckelman@nomic.net>"]
+description = "Vassal Game Library Common"
+license = "GPL-3.0-or-later"
+edition = "2024"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+thiserror = "2.0"
+urlencoding = "2.1.3"

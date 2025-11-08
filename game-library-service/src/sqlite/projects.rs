@@ -1,14 +1,12 @@
 use const_format::formatcp;
+use glc::pagination::{Direction, Facet, SortBy};
 use sqlx::{
     Encode, Executor, QueryBuilder, Type,
     query_builder::Separated,
     sqlite::Sqlite
 };
 
-use crate::{
-    db::{DatabaseError, ProjectSummaryRow},
-    pagination::{Direction, Facet, SortBy}
-};
+use crate::db::{DatabaseError, ProjectSummaryRow};
 
 // TODO: put a QueryBuilder into the db object for reuse?
 
@@ -162,7 +160,11 @@ FROM projects
     )
 }
 
-impl SortBy {
+trait SortByField {
+    fn field(&self) -> &'static str;
+}
+
+impl SortByField for SortBy {
     fn field(&self) -> &'static str {
         match self {
             SortBy::ProjectName => "projects.name COLLATE NOCASE",
@@ -174,7 +176,13 @@ impl SortBy {
     }
 }
 
-impl Direction {
+trait DirectionStrs {
+    fn dir(&self) -> &'static str;
+
+    fn op(&self) -> &'static str;
+}
+
+impl DirectionStrs for Direction {
     fn dir(&self) -> &'static str {
         match self {
             Direction::Ascending => "ASC",

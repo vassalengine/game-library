@@ -17,6 +17,7 @@ chrono = "0.4"
 const_format = "0.2.34"
 futures = "0.3"
 futures-util = "0.3"
+glc = { path = "../game-library-common" }
 http = "1.3"
 http-body-util = "0.1"
 infer = "0.19"

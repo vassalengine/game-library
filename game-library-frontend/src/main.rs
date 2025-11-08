@@ -9,6 +9,7 @@ use axum::{
 };
 use bytes::{Buf, Bytes};
 use futures::future;
+use glc::model::{ProjectData, Users};
 use http::header::{CACHE_CONTROL, HeaderValue};
 use mime::APPLICATION_JSON;
 use reqwest::{
@@ -16,7 +17,7 @@ use reqwest::{
     header::ACCEPT
 };
 use serde::{
-    Deserialize, Serialize,
+    Deserialize,
     de::DeserializeOwned
 };
 use std::{
@@ -190,77 +191,6 @@ impl IntoResponse for AppError {
         error!("{}", self);
         (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()).into_response()
     }
-}
-
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-pub struct Range {
-    pub min: Option<i64>,
-    pub max: Option<i64>
-}
-
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-pub struct GameData {
-    pub title: String,
-    pub title_sort_key: String,
-    pub publisher: String,
-    pub year: String,
-    pub players: Range,
-    pub length: Range
-}
-
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub struct FileData {
-    pub filename: String,
-    pub url: String,
-    pub size: i64,
-    pub sha256: String,
-    pub published_at: String,
-    pub published_by: String,
-    pub requires: Option<String>
-}
-
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub struct ReleaseData {
-    pub version: String,
-    pub files: Vec<FileData>
-}
-
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub struct PackageData {
-    pub name: String,
-    pub slug: String,
-    pub sort_key: i64,
-    pub description: String,
-    pub releases: Vec<ReleaseData>
-}
-
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub struct GalleryImage {
-    pub id: i64,
-    pub filename: String,
-    pub description: String
-}
-
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub struct ProjectData {
-    pub name: String,
-    pub slug: String,
-    pub description: String,
-    pub revision: i64,
-    pub created_at: String,
-    pub modified_at: String,
-    pub tags: Vec<String>,
-    pub game: GameData,
-    pub readme: String,
-    pub image: Option<String>,
-    pub owners: Vec<String>,
-    pub packages: Vec<PackageData>,
-    pub gallery: Vec<GalleryImage>
-}
-
-#[derive(Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub struct Users {
-    pub users: Vec<String>
 }
 
 #[derive(Template)]

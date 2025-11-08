@@ -1,6 +1,5 @@
+use glc::pagination::{Anchor, Facet, Limit, Direction, SortBy, Seek};
 use serde::Deserialize;
-
-use crate::pagination::{Anchor, Facet, Limit, Direction, SortBy, Seek};
 
 #[derive(Debug, Default, Deserialize, Eq, PartialEq)]
 pub struct MaybeProjectsParams {

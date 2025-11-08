@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use axum::body::Bytes;
 use futures::Stream;
+use glc::model::{Flags, Projects, ProjectData, Publishers, Tags, Users};
 use mime::Mime;
 use std::{
     io,
@@ -11,7 +12,7 @@ use thiserror::Error;
 use crate::{
     db,
     input::{FlagPost, GalleryPatch, PackageDataPatch, PackageDataPost, ProjectDataPatch, ProjectDataPost},
-    model::{Admin, Flag, Flags, Owner, Package, Projects, ProjectData, Project, Publishers, Release, Tags, User, Users},
+    model::{Admin, Flag, Owner, Package, Project, Release, User},
     module,
     params::ProjectsParams,
     time,

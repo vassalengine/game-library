@@ -1,3 +1,4 @@
+use glc::model::GalleryImage;
 use num_bigint::BigUint;
 use sqlx::{
     Acquire, Executor, Transaction,
@@ -6,9 +7,9 @@ use sqlx::{
 use std::collections::HashMap;
 
 use crate::{
-    db::{DatabaseError, map_unique},
+    db::DatabaseError,
     input::{GalleryOp, GalleryPatch},
-    model::{GalleryImage, GalleryItem, Owner, Project},
+    model::{Owner, Project},
     sqlite::{
         require_one_modified,
         project::update_project_non_project_data

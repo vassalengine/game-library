@@ -1,3 +1,4 @@
+use glc::model::Users;
 use sqlx::{
     Acquire, Executor,
     sqlite::Sqlite
@@ -5,7 +6,7 @@ use sqlx::{
 
 use crate::{
     db::DatabaseError,
-    model::{Project, User, Users}
+    model::{Project, User}
 };
 
 pub async fn get_user_id<'e, E>(

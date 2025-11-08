@@ -1094,6 +1094,7 @@ dependencies = [
  "axum",
  "bytes",
  "futures",
+ "glc",
  "http",
  "mime",
  "reqwest",
@@ -1145,6 +1146,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "glc"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "thiserror 2.0.17",
+ "urlencoding",
+]
+
+[[package]]
 name = "glob"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1162,6 +1172,7 @@ dependencies = [
  "const_format",
  "futures",
  "futures-util",
+ "glc",
  "http",
  "http-body-util",
  "infer",

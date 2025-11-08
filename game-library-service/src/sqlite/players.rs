@@ -1,11 +1,12 @@
+use glc::model::Users;
 use sqlx::{
     Executor,
     sqlite::Sqlite
 };
 
 use crate::{
-   db::DatabaseError,
-   model::{Project, User, Users}
+    db::DatabaseError,
+    model::{Project, User}
 };
 
 pub async fn get_players<'e, E>(

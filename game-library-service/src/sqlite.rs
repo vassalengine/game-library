@@ -1,3 +1,7 @@
+use glc::{
+    model::{GalleryImage, Users},
+    pagination::{Direction, Facet, SortBy}
+};
 use sqlx::{
     Database,
     sqlite::{Sqlite, SqliteQueryResult}
@@ -17,8 +21,7 @@ mod users;
 use crate::{
     db::{DatabaseClient, DatabaseError, FileRow, FlagRow, MidField, PackageRow, ProjectRow, ProjectSummaryRow, ReleaseRow},
     input::{FlagPost, GalleryPatch, PackageDataPatch, PackageDataPost, ProjectDataPatch, ProjectDataPost},
-    model::{Admin, Flag, GalleryImage, Owner, Package, Project, Release, User, Users},
-    pagination::{Direction, Facet, SortBy},
+    model::{Admin, Flag, Owner, Package, Project, Release, User},
     version::Version
 };
 

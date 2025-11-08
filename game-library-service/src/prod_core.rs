@@ -4,6 +4,10 @@ use axum::body::Bytes;
 use chrono::{DateTime, Utc};
 use futures::Stream;
 use futures_util::future::try_join_all;
+use glc::{
+    model::{FileData, FlagData, Flags, GalleryImage, GameData, PackageData, ProjectData, Projects, ProjectSummary, Publishers, Range, ReleaseData, Tags, Users},
+    pagination::{Anchor, Direction, Facet, Limit, SortBy, Pagination, Seek, SeekLink}
+};
 use mime::Mime;
 use std::{
     future::Future,
@@ -26,9 +30,8 @@ use crate::{
     core::{AddImageError, AddFileError, AddFlagError, AddOwnersError, AddPlayerError, CloseFlagError, Core, CreatePackageError, CreateProjectError, CreateReleaseError, DeletePackageError, DeleteReleaseError, GetFlagsError, GetIdError, GetImageError, GetPlayersError, GetProjectError, GetProjectsError, GetPublishersError, GetOwnersError, GetTagsError, RemoveOwnersError, RemovePlayerError, UpdateGalleryError, UpdatePackageError, UpdateProjectError, UserIsOwnerError},
     db::{DatabaseClient, DatabaseError, FileRow, FlagRow, MidField, PackageRow, ProjectRow, ProjectSummaryRow, ReleaseRow},
     input::{is_valid_package_name, slug_for, ConsecutiveWhitespace, FlagPost, GameDataPatch, GameDataPost, GalleryPatch, PackageDataPatch, PackageDataPost, ProjectDataPatch, ProjectDataPost},
-    model::{Admin, FileData, Flag, FlagData, Flags, GalleryImage, GameData, Owner, Package, PackageData, ProjectData, Project, Projects, ProjectSummary, Publishers, Range, Release, ReleaseData, Tags, User, Users},
+    model::{Admin, Flag, Owner, Package, Project, Release, User},
     module::{dump_moduledata, versions_in_moduledata},
-    pagination::{Anchor, Direction, Facet, Limit, SortBy, Pagination, Seek, SeekLink},
     params::ProjectsParams,
     time::{self, nanos_to_rfc3339, rfc3339_to_nanos},
     upload::{Uploader, safe_filename, stream_to_writer},
@@ -940,7 +943,7 @@ where
         // convert the rows and tags to summaries
         let pi = projects.into_iter()
             .zip(tags)
-            .map(ProjectSummary::try_from);
+            .map(make_project_summary);
 
         let psums = match anchor {
             Anchor::Before(..) => pi.rev().collect::<Result<Vec<_>, _>>(),
@@ -1358,39 +1361,36 @@ impl ProjectSummaryRow {
     }
 }
 
-impl TryFrom<(ProjectSummaryRow, Vec<String>)> for ProjectSummary {
-    type Error = time::Error;
-
-    fn try_from(
-        (r, tags): (ProjectSummaryRow, Vec<String>)
-    ) -> Result<Self, Self::Error>
-    {
-        Ok(
-            ProjectSummary {
-                name: r.name,
-                slug: r.slug,
-                description: r.description,
-                revision: r.revision,
-                created_at: nanos_to_rfc3339(r.created_at)?,
-                modified_at: nanos_to_rfc3339(r.modified_at)?,
-                tags,
-                game: GameData {
-                    title: r.game_title,
-                    title_sort_key: r.game_title_sort,
-                    publisher: r.game_publisher,
-                    year: r.game_year,
-                    players: Range {
-                        min: r.game_players_min,
-                        max: r.game_players_max
-                    },
-                    length: Range {
-                        min: r.game_length_min,
-                        max: r.game_length_max
-                    }
+fn make_project_summary(
+    t: (ProjectSummaryRow, Vec<String>)
+) -> Result<ProjectSummary, time::Error>
+{
+    let (r, tags) = t;
+    Ok(
+        ProjectSummary {
+            name: r.name,
+            slug: r.slug,
+            description: r.description,
+            revision: r.revision,
+            created_at: nanos_to_rfc3339(r.created_at)?,
+            modified_at: nanos_to_rfc3339(r.modified_at)?,
+            tags,
+            game: GameData {
+                title: r.game_title,
+                title_sort_key: r.game_title_sort,
+                publisher: r.game_publisher,
+                year: r.game_year,
+                players: Range {
+                    min: r.game_players_min,
+                    max: r.game_players_max
+                },
+                length: Range {
+                    min: r.game_length_min,
+                    max: r.game_length_max
                 }
             }
-        )
-    }
+        }
+    )
 }
 
 impl TryFrom<FlagRow> for FlagData {
@@ -1470,7 +1470,6 @@ mod test {
 
     use crate::{
         input::{GameDataPatch, GameDataPost, RangePatch, RangePost},
-        pagination::Direction,
         sqlite::{Pool, SqlxDatabaseClient},
         upload::UploadError
     };

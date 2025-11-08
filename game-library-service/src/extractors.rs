@@ -351,14 +351,14 @@ mod test {
         },
         routing::get
     };
+    use glc::model::Users;
     use std::sync::Arc;
     use tower::ServiceExt; // for oneshot
 
     use crate::{
         app::AppState,
         core::{Core, GetIdError, GetOwnersError, UserIsOwnerError},
-        jwt::EncodingKey,
-        model::Users
+        jwt::EncodingKey
     };
 
     const KEY: &[u8] = b"@wlD+3L)EHdv28u)OFWx@83_*TxhVf9IdUncaAz6ICbM~)j+dH=sR2^LXp(tW31z";
