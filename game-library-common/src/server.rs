@@ -42,6 +42,12 @@ impl SpanMaker {
     }
 }
 
+impl Default for SpanMaker {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MakeSpan<Body> for SpanMaker {
     fn make_span(&mut self, request: &Request<Body>) -> Span {
         if self.include_headers {

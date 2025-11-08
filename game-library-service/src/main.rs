@@ -3,14 +3,13 @@
 use axum::{
     Router, serve,
     body::Body,
-    extract::{ConnectInfo, Request},
     http::StatusCode,
     response::{IntoResponse, Json, Response},
     routing::{get, patch, post, put}
 };
 use chrono::Utc;
 use futures_util::future::try_join_all;
-use glc::server::{real_addr, setup_logging, shutdown_signal, SpanMaker};
+use glc::server::{setup_logging, shutdown_signal, SpanMaker};
 use serde::{Deserialize, Serialize};
 use sqlx::sqlite::SqlitePoolOptions;
 use std::{

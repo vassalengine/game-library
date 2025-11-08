@@ -1,9 +1,8 @@
 use askama::Template;
 use axum::{
     Router, serve,
-    body::Body,
     http::StatusCode,
-    extract::{ConnectInfo, Path, Request, State},
+    extract::{Path, State},
     response::{Html, IntoResponse, Response},
     routing::get
 };
@@ -11,7 +10,7 @@ use bytes::{Buf, Bytes};
 use futures::future;
 use glc::{
     model::{ProjectData, Users},
-    server::{real_addr, setup_logging, shutdown_signal, SpanMaker}
+    server::{setup_logging, shutdown_signal, SpanMaker}
 };
 use http::header::{CACHE_CONTROL, HeaderValue};
 use mime::APPLICATION_JSON;
