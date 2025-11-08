@@ -5,6 +5,13 @@ use axum::{
 use std::net::SocketAddr;
 use tower_http::trace::MakeSpan;
 use tracing::{info, info_span, Span};
+use tracing_appender::non_blocking::WorkerGuard;
+use tracing_panic::panic_hook;
+use tracing_subscriber::{
+    EnvFilter,
+    layer::SubscriberExt,
+    util::SubscriberInitExt
+};
 
 pub fn real_addr(request: &Request) -> String {
     // If we're behind a proxy, get IP from X-Forwarded-For header
@@ -77,4 +84,37 @@ pub async fn shutdown_signal() {
         _ = quit.recv() => info!("received SIGQUIT"),
         _ = terminate.recv() => info!("received SIGTERM")
     }
+}
+
+pub async fn setup_logging(log_base: &str) -> WorkerGuard {
+    // set up logging
+    // TODO: make log location configurable
+    let file_appender = tracing_appender::rolling::daily("", log_base);
+    let (non_blocking, guard) = tracing_appender::non_blocking(file_appender);
+
+    tracing_subscriber::registry()
+        .with(EnvFilter::try_from_default_env()
+            .unwrap_or_else(|_| {
+                [
+                    // log this crate at info level
+                    &format!("{}=info", env!("CARGO_CRATE_NAME")),
+                    // tower_http is noisy below info
+                    "tower_http=info",
+                    // axum::rejection=trace shows rejections from extractors
+                    "axum::rejection=trace",
+                    // every panic is a fatal error
+                    "tracing_panic=error"
+                ].join(",").into()
+            })
+        )
+        .with(tracing_subscriber::fmt::layer()
+            .with_target(false)
+            .with_writer(non_blocking)
+        )
+        .init();
+
+    // ensure that panics are logged
+    std::panic::set_hook(Box::new(panic_hook));
+
+    guard 
 }
