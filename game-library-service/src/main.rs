@@ -10,7 +10,7 @@ use axum::{
 };
 use chrono::Utc;
 use futures_util::future::try_join_all;
-use glc::server::{real_addr, SpanMaker};
+use glc::server::{real_addr, shutdown_signal, SpanMaker};
 use serde::{Deserialize, Serialize};
 use sqlx::sqlite::SqlitePoolOptions;
 use std::{
@@ -312,26 +312,6 @@ enum StartupError {
     BucketUploader(#[from] upload::BucketUploaderError),
     #[error("Uploads directory does not exist")]
     NoUploadsDirectory
-}
-
-async fn shutdown_signal() {
-    use tokio::signal::unix::{signal, SignalKind};
-
-    let mut interrupt = signal(SignalKind::interrupt())
-        .expect("failed to install signal handler");
-
-    // Docker sends SIGQUIT for some unfathomable reason
-    let mut quit = signal(SignalKind::quit())
-        .expect("failed to install signal handler");
-
-    let mut terminate = signal(SignalKind::terminate())
-        .expect("failed to install signal handler");
-
-    tokio::select! {
-        _ = interrupt.recv() => info!("received SIGINT"),
-        _ = quit.recv() => info!("received SIGQUIT"),
-        _ = terminate.recv() => info!("received SIGTERM")
-    }
 }
 
 async fn run() -> Result<(), StartupError> {

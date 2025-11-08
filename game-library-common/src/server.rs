@@ -4,7 +4,7 @@ use axum::{
 };
 use std::net::SocketAddr;
 use tower_http::trace::MakeSpan;
-use tracing::{info_span, Span};
+use tracing::{info, info_span, Span};
 
 pub fn real_addr(request: &Request) -> String {
     // If we're behind a proxy, get IP from X-Forwarded-For header
@@ -56,5 +56,25 @@ impl MakeSpan<Body> for SpanMaker {
                 version = ?request.version()
             )
         }
+    }
+}
+
+pub async fn shutdown_signal() {
+    use tokio::signal::unix::{signal, SignalKind};
+
+    let mut interrupt = signal(SignalKind::interrupt())
+        .expect("failed to install signal handler");
+
+    // Docker sends SIGQUIT for some unfathomable reason
+    let mut quit = signal(SignalKind::quit())
+        .expect("failed to install signal handler");
+
+    let mut terminate = signal(SignalKind::terminate())
+        .expect("failed to install signal handler");
+
+    tokio::select! {
+        _ = interrupt.recv() => info!("received SIGINT"),
+        _ = quit.recv() => info!("received SIGQUIT"),
+        _ = terminate.recv() => info!("received SIGTERM")
     }
 }

@@ -11,7 +11,7 @@ use bytes::{Buf, Bytes};
 use futures::future;
 use glc::{
     model::{ProjectData, Users},
-    server::{real_addr, SpanMaker}
+    server::{real_addr, shutdown_signal, SpanMaker}
 };
 use http::header::{CACHE_CONTROL, HeaderValue};
 use mime::APPLICATION_JSON;
@@ -212,26 +212,6 @@ async fn project_page(
     let players = r.next().expect("impossible").and_then(parse_data);
 
     HtmlTemplate(ProjectTemplate(proj, players))
-}
-
-async fn shutdown_signal() {
-    use tokio::signal::unix::{signal, SignalKind};
-
-    let mut interrupt = signal(SignalKind::interrupt())
-        .expect("failed to install signal handler");
-
-    // Docker sends SIGQUIT for some unfathomable reason
-    let mut quit = signal(SignalKind::quit())
-        .expect("failed to install signal handler");
-
-    let mut terminate = signal(SignalKind::terminate())
-        .expect("failed to install signal handler");
-
-    tokio::select! {
-        _ = interrupt.recv() => info!("received SIGINT"),
-        _ = quit.recv() => info!("received SIGQUIT"),
-        _ = terminate.recv() => info!("received SIGTERM")
-    }
 }
 
 #[derive(Debug, Deserialize)]
