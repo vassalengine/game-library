@@ -1,8 +1,10 @@
 use axum::{
+    Router,
     body::Body,
     extract::{ConnectInfo, Request}
 };
-use std::net::SocketAddr;
+use std::net::{IpAddr, SocketAddr};
+use tokio::net::TcpListener;
 use tower_http::trace::MakeSpan;
 use tracing::{info, info_span, Span};
 use tracing_appender::non_blocking::WorkerGuard;
@@ -13,7 +15,7 @@ use tracing_subscriber::{
     util::SubscriberInitExt
 };
 
-pub fn real_addr(request: &Request) -> String {
+fn real_addr(request: &Request) -> String {
     // If we're behind a proxy, get IP from X-Forwarded-For header
     match request.headers().get("x-forwarded-for") {
         Some(addr) => addr.to_str()
@@ -72,26 +74,6 @@ impl MakeSpan<Body> for SpanMaker {
     }
 }
 
-pub async fn shutdown_signal() {
-    use tokio::signal::unix::{signal, SignalKind};
-
-    let mut interrupt = signal(SignalKind::interrupt())
-        .expect("failed to install signal handler");
-
-    // Docker sends SIGQUIT for some unfathomable reason
-    let mut quit = signal(SignalKind::quit())
-        .expect("failed to install signal handler");
-
-    let mut terminate = signal(SignalKind::terminate())
-        .expect("failed to install signal handler");
-
-    tokio::select! {
-        _ = interrupt.recv() => info!("received SIGINT"),
-        _ = quit.recv() => info!("received SIGQUIT"),
-        _ = terminate.recv() => info!("received SIGTERM")
-    }
-}
-
 pub async fn setup_logging(log_base: &str) -> WorkerGuard {
     // set up logging
     // TODO: make log location configurable
@@ -123,4 +105,88 @@ pub async fn setup_logging(log_base: &str) -> WorkerGuard {
     std::panic::set_hook(Box::new(panic_hook));
 
     guard
+}
+
+pub async fn shutdown_signal() {
+    use tokio::signal::unix::{signal, SignalKind};
+
+    let mut interrupt = signal(SignalKind::interrupt())
+        .expect("failed to install signal handler");
+
+    // Docker sends SIGQUIT for some unfathomable reason
+    let mut quit = signal(SignalKind::quit())
+        .expect("failed to install signal handler");
+
+    let mut terminate = signal(SignalKind::terminate())
+        .expect("failed to install signal handler");
+
+    tokio::select! {
+        _ = interrupt.recv() => info!("received SIGINT"),
+        _ = quit.recv() => info!("received SIGQUIT"),
+        _ = terminate.recv() => info!("received SIGTERM")
+    }
+}
+
+pub async fn serve(
+    app: Router,
+    ip: IpAddr,
+    port: u16
+) -> Result<(), std::io::Error>
+{
+    let addr = SocketAddr::from((ip, port));
+    let listener = TcpListener::bind(addr).await?;
+    info!("Listening on {}", addr);
+
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>()
+    )
+    .with_graceful_shutdown(shutdown_signal())
+    .await?;
+
+    Ok(())
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    use nix::{
+        sys::{self, signal::Signal},
+        unistd::Pid
+    };
+    use std::net::Ipv4Addr;
+
+    #[track_caller]
+    async fn assert_shutdown(sig: Signal) {
+        let app = Router::new();
+        let pid = Pid::this();
+
+        let server_handle = tokio::spawn(
+            serve(app, IpAddr::V4(Ipv4Addr::LOCALHOST), 0)
+                .into_future()
+        );
+
+        // ensure that the server has a chance to start
+        tokio::task::yield_now().await;
+
+        sys::signal::kill(pid, sig).unwrap();
+
+        server_handle.await.unwrap().unwrap();
+    }
+
+    #[tokio::test]
+    async fn graceful_shutdown_sigint() {
+        assert_shutdown(Signal::SIGTERM).await;
+    }
+
+    #[tokio::test]
+    async fn graceful_shutdown_sigquit() {
+        assert_shutdown(Signal::SIGQUIT).await;
+    }
+
+    #[tokio::test]
+    async fn graceful_shutdown_sigterm() {
+        assert_shutdown(Signal::SIGTERM).await;
+    }
 }

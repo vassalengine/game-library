@@ -1,26 +1,24 @@
 #![feature(async_fn_track_caller)]
 
 use axum::{
-    Router, serve,
-    body::Body,
+    Router,
     http::StatusCode,
     response::{IntoResponse, Json, Response},
     routing::{get, patch, post, put}
 };
 use chrono::Utc;
 use futures_util::future::try_join_all;
-use glc::server::{setup_logging, shutdown_signal, SpanMaker};
+use glc::server::{setup_logging, serve, SpanMaker};
 use serde::{Deserialize, Serialize};
 use sqlx::sqlite::SqlitePoolOptions;
 use std::{
     fs,
     io,
-    net::{IpAddr, SocketAddr},
+    net::IpAddr,
     path::PathBuf,
     sync::Arc,
     time::Duration
 };
-use tokio::net::TcpListener;
 use tower::ServiceBuilder;
 use tower_http::{
     compression::CompressionLayer,
@@ -360,16 +358,7 @@ async fn run() -> Result<(), StartupError> {
     ).with_state(state);
 
     let ip: IpAddr = config.listen_ip.parse()?;
-    let addr = SocketAddr::from((ip, config.listen_port));
-    let listener = TcpListener::bind(addr).await?;
-    info!("Listening on {}", addr);
-
-    serve(
-        listener,
-        app.into_make_service_with_connect_info::<SocketAddr>()
-    )
-    .with_graceful_shutdown(shutdown_signal())
-    .await?;
+    serve(app, ip, config.listen_port).await?;
 
     Ok(())
 }
@@ -407,11 +396,6 @@ mod test {
     };
     use mime::{APPLICATION_JSON, IMAGE_PNG, TEXT_PLAIN, Mime};
     use once_cell::sync::Lazy;
-    use nix::{
-        sys::{self, signal::Signal},
-        unistd::Pid
-    };
-    use std::future::IntoFuture;
     use tokio_util::io::StreamReader;
     use tower::ServiceExt; // for oneshot
 
@@ -1024,26 +1008,6 @@ mod test {
     }
 
     #[track_caller]
-    async fn assert_shutdown(sig: Signal) {
-        let listener = TcpListener::bind("localhost:0").await.unwrap();
-        let app = Router::new();
-        let pid = Pid::this();
-
-        let server_handle = tokio::spawn(
-            serve(listener, app)
-                .with_graceful_shutdown(shutdown_signal())
-                .into_future()
-        );
-
-        // ensure that the server has a chance to start
-        tokio::task::yield_now().await;
-
-        sys::signal::kill(pid, sig).unwrap();
-
-        server_handle.await.unwrap().unwrap();
-    }
-
-    #[track_caller]
     async fn assert_ok(response: Response) {
         assert_eq!(response.status(), StatusCode::OK);
         assert!(body_empty(response).await);
@@ -1119,21 +1083,6 @@ mod test {
             body_as::<HttpError>(response).await,
             HttpError::from(AppError::JsonError)
         );
-    }
-
-    #[tokio::test]
-    async fn graceful_shutdown_sigint() {
-        assert_shutdown(Signal::SIGTERM).await;
-    }
-
-    #[tokio::test]
-    async fn graceful_shutdown_sigquit() {
-        assert_shutdown(Signal::SIGQUIT).await;
-    }
-
-    #[tokio::test]
-    async fn graceful_shutdown_sigterm() {
-        assert_shutdown(Signal::SIGTERM).await;
     }
 
     #[tokio::test]

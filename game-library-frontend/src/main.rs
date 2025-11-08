@@ -1,6 +1,6 @@
 use askama::Template;
 use axum::{
-    Router, serve,
+    Router,
     http::StatusCode,
     extract::{Path, State},
     response::{Html, IntoResponse, Response},
@@ -10,7 +10,7 @@ use bytes::{Buf, Bytes};
 use futures::future;
 use glc::{
     model::{ProjectData, Users},
-    server::{setup_logging, shutdown_signal, SpanMaker}
+    server::{setup_logging, serve, SpanMaker}
 };
 use http::header::{CACHE_CONTROL, HeaderValue};
 use mime::APPLICATION_JSON;
@@ -25,11 +25,10 @@ use serde::{
 use std::{
     fs,
     io,
-    net::{IpAddr, SocketAddr},
+    net::IpAddr,
     sync::Arc,
     time::Duration
 };
-use tokio::net::TcpListener;
 use tower::ServiceBuilder;
 use tower_http::{
     compression::CompressionLayer,
@@ -237,16 +236,7 @@ async fn run() -> Result<(), StartupError> {
 
     // serve pages
     let ip: IpAddr = config.listen_ip.parse()?;
-    let addr = SocketAddr::from((ip, config.listen_port));
-    let listener = TcpListener::bind(addr).await?;
-    info!("Listening on {}", addr);
-
-    serve(
-        listener,
-        app.into_make_service_with_connect_info::<SocketAddr>()
-    )
-    .with_graceful_shutdown(shutdown_signal())
-    .await?;
+    serve(app, ip, config.listen_port).await?;
 
     Ok(())
 }
