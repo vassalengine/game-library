@@ -20,5 +20,7 @@ pub struct Config {
     pub upload_dir: String,
     pub upload_timeout: u64,
     pub log_headers: bool,
-    pub admins: Vec<String>
+    pub admins: Vec<String>,
+    // See: discourse webhooks
+    pub discourse_update_secret: String
 }

@@ -17,3 +17,4 @@ upload_dir = "uploads"
 upload_timeout = 300
 log_headers = false
 admins = ["alice", "bob"]
+discourse_update_secret = ""

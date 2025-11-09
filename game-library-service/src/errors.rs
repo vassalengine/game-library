@@ -1,3 +1,4 @@
+use glc::discourse::DiscourseEventError;
 use thiserror::Error;
 
 use crate::core::{AddFlagError, AddImageError, AddFileError, AddOwnersError, AddPlayerError, CloseFlagError, CreatePackageError, CreateProjectError, CreateReleaseError, DeletePackageError, DeleteReleaseError, GetFlagsError, GetIdError, GetImageError, GetOwnersError, GetPlayersError, GetProjectError, GetProjectsError, GetPublishersError, GetTagsError, RemoveOwnersError, RemovePlayerError, UpdateGalleryError, UpdatePackageError, UpdateProjectError, UserIsOwnerError};
@@ -293,6 +294,16 @@ impl From<GetFlagsError> for AppError {
         match err {
             GetFlagsError::DatabaseError(e) => AppError::DatabaseError(e.to_string()),
             GetFlagsError::TimeError(e) => AppError::InternalError(e.to_string())
+        }
+    }
+}
+
+impl From<DiscourseEventError> for AppError {
+    fn from(e: DiscourseEventError) -> Self {
+        match e {
+            DiscourseEventError::BadMimeType => AppError::BadMimeType,
+            DiscourseEventError::MalformedQuery => AppError::MalformedQuery,
+            DiscourseEventError::Unauthorized => AppError::Unauthorized
         }
     }
 }

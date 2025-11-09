@@ -48,7 +48,7 @@ mod upload;
 mod version;
 
 use crate::{
-    app::AppState,
+    app::{AppState, DiscourseUpdateConfig},
     config::Config,
     core::{Core, CoreArc},
     prod_core::ProdCore,
@@ -344,10 +344,15 @@ async fn run() -> Result<(), StartupError> {
 
     admins.sort();
 
+    let duc = DiscourseUpdateConfig {
+        secret: config.discourse_update_secret.into_bytes()
+    };
+
     let state = AppState {
         key: Arc::new(DecodingKey::from_secret(config.jwt_key.as_bytes())),
         core: Arc::new(core) as CoreArc,
-        admins: Arc::new(admins)
+        admins: Arc::new(admins),
+        discourse_update_config: Arc::new(duc)
     };
 
     let app: Router = routes(
@@ -972,7 +977,8 @@ mod test {
         AppState {
             key: Arc::new(DecodingKey::from_secret(KEY)),
             core: Arc::new(TestCore {}) as CoreArc,
-            admins: Arc::new(vec![User(5)])
+            admins: Arc::new(vec![User(5)]),
+            discourse_update_config: Default::default()
         }
     }
 
