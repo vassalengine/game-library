@@ -15,6 +15,7 @@ use axum_extra::{
     }
 };
 use itertools::Itertools;
+use glc::extract::get_state;
 
 use crate::{
     core::CoreArc,
@@ -107,19 +108,6 @@ where
     v.0
 }
 
-async fn get_state<S>(
-    parts: &mut Parts,
-    state: &S
-) -> CoreArc
-where
-    S: Send + Sync,
-    CoreArc: FromRef<S>
-{
-    let Ok(c) = State::<CoreArc>::from_request_parts(parts, state)
-        .await;
-    c.0
-}
-
 async fn get_path_iter<S>(
     parts: &mut Parts,
     state: &S
@@ -156,7 +144,7 @@ where
             .next_tuple()
             .ok_or(AppError::InternalError("empty path iter".into()))?;
 
-        let core = get_state(parts, state).await;
+        let core: CoreArc = get_state(parts, state).await;
 
         // look up the project id
         Ok(core.get_project_id(&proj).await?)
@@ -182,7 +170,7 @@ where
             .next_tuple()
             .ok_or(AppError::InternalError("empty path iter".into()))?;
 
-        let core = get_state(parts, state).await;
+        let core: CoreArc = get_state(parts, state).await;
 
         // look up the project, package ids
         Ok(
@@ -212,7 +200,7 @@ where
             .next_tuple()
             .ok_or(AppError::InternalError("empty path iter".into()))?;
 
-        let core = get_state(parts, state).await;
+        let core: CoreArc = get_state(parts, state).await;
 
         // look up the project, package, release ids
         Ok(
@@ -242,7 +230,7 @@ where
         // check that that project exists
         let proj = Project::from_request_parts(parts, state).await?;
 
-        let core = get_state(parts, state).await;
+        let core: CoreArc = get_state(parts, state).await;
 
         // check that that requester owns the project
         match core.user_is_owner(user, proj).await? {
@@ -269,7 +257,7 @@ where
             .next_tuple()
             .ok_or(AppError::InternalError("empty path iter".into()))?;
 
-        let core = get_state(parts, state).await;
+        let core: CoreArc = get_state(parts, state).await;
 
         // flag id must be an integer
         let flag = flag.parse::<i64>()
