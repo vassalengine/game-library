@@ -9,7 +9,10 @@ use axum_extra::{
     headers::{ContentLength, ContentType}
 };
 use futures::{Stream, TryStreamExt};
-use glc::model::{Flags, ProjectData, Projects, Publishers, Tags, Users};
+use glc::{
+    discourse::UserUpdatePost,
+    model::{Flags, ProjectData, Projects, Publishers, Tags, Users}
+};
 use http_body_util::{BodyExt, Limited, LengthLimitError};
 use std::{
     error::Error,
@@ -19,7 +22,7 @@ use std::{
 use crate::{
     core::CoreArc,
     errors::AppError,
-    extractors::{ProjectPackage, ProjectPackageRelease, Wrapper},
+    extractors::{DiscourseEvent, ProjectPackage, ProjectPackageRelease, Wrapper},
     input::{FlagPost, GalleryPatch, PackageDataPatch, PackageDataPost, ProjectDataPatch, ProjectDataPost},
     model::{Admin, Flag, Owned, Project, User},
     params::ProjectsParams,
@@ -383,6 +386,14 @@ pub async fn admin_flags_get(
 ) -> Result<Json<Flags>, AppError>
 {
     Ok(Json(core.get_flags().await?))
+}
+
+pub async fn admin_user_event_post(
+    State(core): State<CoreArc>,
+    DiscourseEvent(data): DiscourseEvent<UserUpdatePost>
+) -> Result<(), AppError>
+{
+    Ok(core.update_user(&data.user).await?)
 }
 
 #[cfg(test)]

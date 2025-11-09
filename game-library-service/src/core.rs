@@ -1,7 +1,10 @@
 use async_trait::async_trait;
 use axum::body::Bytes;
 use futures::Stream;
-use glc::model::{Flags, Projects, ProjectData, Publishers, Tags, Users};
+use glc::{
+    discourse::UserUpdateParams,
+    model::{Flags, Projects, ProjectData, Publishers, Tags, Users}
+};
 use mime::Mime;
 use std::{
     io,
@@ -347,6 +350,12 @@ pub enum GetFlagsError {
     TimeError(#[from] time::Error)
 }
 
+#[derive(Debug, Error, PartialEq)]
+pub enum UpdateUserError {
+    #[error("{0}")]
+    DatabaseError(#[from] db::DatabaseError)
+}
+
 #[async_trait]
 pub trait Core {
     fn max_file_size(&self) -> usize {
@@ -684,6 +693,13 @@ pub trait Core {
         &self
     ) -> Result<Flags, GetFlagsError>
     {
+        unimplemented!();
+    }
+
+    async fn update_user(
+        &self,
+        _params: &UserUpdateParams
+    ) -> Result<(), UpdateUserError> {
         unimplemented!();
     }
 }

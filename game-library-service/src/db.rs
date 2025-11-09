@@ -1,4 +1,5 @@
 use glc::{
+    discourse::UserUpdateParams,
     model::{FlagTag, GalleryImage, Users},
     pagination::{Direction, Facet, SortBy}
 };
@@ -160,6 +161,11 @@ pub trait DatabaseClient {
         &self,
         _username: &str
     ) -> impl Future<Output = Result<Option<User>, DatabaseError>> + Send;
+
+    fn update_user(
+        &self,
+        _params: &UserUpdateParams
+    ) -> impl Future<Output = Result<(), DatabaseError>> + Send;
 
     fn get_owners(
         &self,

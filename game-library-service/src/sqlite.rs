@@ -1,4 +1,5 @@
 use glc::{
+    discourse::UserUpdateParams,
     model::{GalleryImage, Users},
     pagination::{Direction, Facet, SortBy}
 };
@@ -53,6 +54,13 @@ impl DatabaseClient for SqlxDatabaseClient<Sqlite> {
     ) -> Result<Option<User>, DatabaseError>
     {
         users::get_user_id(&self.0, username).await
+    }
+
+    async fn update_user(
+        &self,
+        params: &UserUpdateParams
+    ) -> Result<(), DatabaseError> {
+        users::update_user(&self.0, params).await
     }
 
     async fn get_owners(

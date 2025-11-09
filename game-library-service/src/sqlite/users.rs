@@ -1,4 +1,7 @@
-use glc::model::Users;
+use glc::{
+    discourse::UserUpdateParams,
+    model::Users
+};
 use sqlx::{
     Acquire, Executor,
     sqlite::Sqlite
@@ -208,6 +211,30 @@ LIMIT 1
         .await?
         .is_some()
     )
+}
+
+pub async fn update_user<'e, E>(
+    ex: E,
+    params: &UserUpdateParams
+) -> Result<(), DatabaseError>
+where
+    E: Executor<'e, Database = Sqlite>
+{
+    sqlx::query!(
+        "
+INSERT OR REPLACE INTO users (
+    user_id,
+    username
+)
+VALUES (?, ?)
+        ",
+        params.id,
+        params.username,
+    )
+    .execute(ex)
+    .await?;
+
+    Ok(())
 }
 
 #[cfg(test)]

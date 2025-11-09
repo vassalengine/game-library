@@ -1,7 +1,7 @@
 use glc::discourse::DiscourseEventError;
 use thiserror::Error;
 
-use crate::core::{AddFlagError, AddImageError, AddFileError, AddOwnersError, AddPlayerError, CloseFlagError, CreatePackageError, CreateProjectError, CreateReleaseError, DeletePackageError, DeleteReleaseError, GetFlagsError, GetIdError, GetImageError, GetOwnersError, GetPlayersError, GetProjectError, GetProjectsError, GetPublishersError, GetTagsError, RemoveOwnersError, RemovePlayerError, UpdateGalleryError, UpdatePackageError, UpdateProjectError, UserIsOwnerError};
+use crate::core::{AddFlagError, AddImageError, AddFileError, AddOwnersError, AddPlayerError, CloseFlagError, CreatePackageError, CreateProjectError, CreateReleaseError, DeletePackageError, DeleteReleaseError, GetFlagsError, GetIdError, GetImageError, GetOwnersError, GetPlayersError, GetProjectError, GetProjectsError, GetPublishersError, GetTagsError, RemoveOwnersError, RemovePlayerError, UpdateGalleryError, UpdatePackageError, UpdateProjectError, UpdateUserError, UserIsOwnerError};
 
 // TODO: better error messsages
 #[derive(Debug, Error, PartialEq)]
@@ -294,6 +294,14 @@ impl From<GetFlagsError> for AppError {
         match err {
             GetFlagsError::DatabaseError(e) => AppError::DatabaseError(e.to_string()),
             GetFlagsError::TimeError(e) => AppError::InternalError(e.to_string())
+        }
+    }
+}
+
+impl From<UpdateUserError> for AppError {
+    fn from(err: UpdateUserError) -> Self {
+        match err {
+            UpdateUserError::DatabaseError(e) => AppError::DatabaseError(e.to_string())
         }
     }
 }

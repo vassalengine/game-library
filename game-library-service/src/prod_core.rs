@@ -5,6 +5,7 @@ use chrono::{DateTime, Utc};
 use futures::Stream;
 use futures_util::future::try_join_all;
 use glc::{
+    discourse::UserUpdateParams,
     model::{FileData, FlagData, Flags, GalleryImage, GameData, PackageData, ProjectData, Projects, ProjectSummary, Publishers, Range, ReleaseData, Tags, Users},
     pagination::{Anchor, Direction, Facet, Limit, SortBy, Pagination, Seek, SeekLink}
 };
@@ -27,7 +28,7 @@ use unicode_properties::{GeneralCategoryGroup, UnicodeGeneralCategory};
 
 use crate::{
     content_type::{infer_image_type, infer_file_type, supported_image_type},
-    core::{AddImageError, AddFileError, AddFlagError, AddOwnersError, AddPlayerError, CloseFlagError, Core, CreatePackageError, CreateProjectError, CreateReleaseError, DeletePackageError, DeleteReleaseError, GetFlagsError, GetIdError, GetImageError, GetPlayersError, GetProjectError, GetProjectsError, GetPublishersError, GetOwnersError, GetTagsError, RemoveOwnersError, RemovePlayerError, UpdateGalleryError, UpdatePackageError, UpdateProjectError, UserIsOwnerError},
+    core::{AddImageError, AddFileError, AddFlagError, AddOwnersError, AddPlayerError, CloseFlagError, Core, CreatePackageError, CreateProjectError, CreateReleaseError, DeletePackageError, DeleteReleaseError, GetFlagsError, GetIdError, GetImageError, GetPlayersError, GetProjectError, GetProjectsError, GetPublishersError, GetOwnersError, GetTagsError, RemoveOwnersError, RemovePlayerError, UpdateGalleryError, UpdatePackageError, UpdateProjectError, UpdateUserError, UserIsOwnerError},
     db::{DatabaseClient, DatabaseError, FileRow, FlagRow, MidField, PackageRow, ProjectRow, ProjectSummaryRow, ReleaseRow},
     input::{is_valid_package_name, slug_for, ConsecutiveWhitespace, FlagPost, GameDataPatch, GameDataPost, GalleryPatch, PackageDataPatch, PackageDataPost, ProjectDataPatch, ProjectDataPost},
     model::{Admin, Flag, Owner, Package, Project, Release, User},
@@ -666,6 +667,13 @@ where
                     .collect::<Result<Vec<_>, _>>()?
             }
         )
+    }
+
+    async fn update_user(
+        &self,
+        params: &UserUpdateParams
+    ) -> Result<(), UpdateUserError> {
+        Ok(self.db.update_user(params).await?)
     }
 }
 

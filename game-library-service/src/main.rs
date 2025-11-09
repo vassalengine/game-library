@@ -252,6 +252,15 @@ fn routes(
                 patch(handlers::admin_flag_close)
             }
         )
+        .route(
+            "/admin/userEvent",
+            if read_only {
+                patch(handlers::forbidden)
+            }
+            else {
+                post(handlers::admin_user_event_post)
+            }
+        )
         .layer(TimeoutLayer::new(Duration::from_secs(10)))
         .route(
             "/projects/{proj}/packages/{pkg_name}/{version}/{file}",
