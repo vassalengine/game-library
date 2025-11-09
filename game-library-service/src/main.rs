@@ -345,9 +345,9 @@ async fn run() -> Result<(), StartupError> {
     admins.sort();
 
     let state = AppState {
-        key: DecodingKey::from_secret(config.jwt_key.as_bytes()),
+        key: Arc::new(DecodingKey::from_secret(config.jwt_key.as_bytes())),
         core: Arc::new(core) as CoreArc,
-        admins
+        admins: Arc::new(admins)
     };
 
     let app: Router = routes(
@@ -970,9 +970,9 @@ mod test {
 
     fn test_state() -> AppState {
         AppState {
-            key: DecodingKey::from_secret(KEY),
+            key: Arc::new(DecodingKey::from_secret(KEY)),
             core: Arc::new(TestCore {}) as CoreArc,
-            admins: vec![User(5)]
+            admins: Arc::new(vec![User(5)])
         }
     }
 

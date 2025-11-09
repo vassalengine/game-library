@@ -1,4 +1,5 @@
 use axum::extract::FromRef;
+use std::sync::Arc;
 
 use crate::{
     core::CoreArc,
@@ -8,7 +9,7 @@ use crate::{
 
 #[derive(Clone, FromRef)]
 pub struct AppState {
-    pub key: DecodingKey,
+    pub key: Arc<DecodingKey>,
     pub core: CoreArc,
-    pub admins: Vec<User>
+    pub admins: Arc<Vec<User>>
 }

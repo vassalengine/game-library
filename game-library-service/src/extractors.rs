@@ -1,7 +1,7 @@
 use axum::{
     RequestPartsExt,
     extract::{
-        FromRef, FromRequest, FromRequestParts, Path, Request, State,
+        FromRef, FromRequest, FromRequestParts, Path, Request,
         rejection::{JsonRejection, QueryRejection}
     },
     http::request::Parts
@@ -15,7 +15,7 @@ use axum_extra::{
     }
 };
 use itertools::Itertools;
-use glc::extract::get_state;
+use std::sync::Arc;
 
 use crate::{
     core::CoreArc,
@@ -27,7 +27,7 @@ use crate::{
 impl<S> FromRequestParts<S> for Claims
 where
     S: Send + Sync,
-    DecodingKey: FromRef<S>
+    Arc<DecodingKey>: FromRef<S>
 {
     type Rejection = AppError;
 
@@ -43,7 +43,7 @@ where
             .or(Err(AppError::Unauthorized))?;
 
         // verify the token
-        let key = DecodingKey::from_ref(state);
+        let key = Arc::<DecodingKey>::from_ref(state);
         let claims = jwt::verify(bearer.token(), &key)
             .or(Err(AppError::Unauthorized))?;
 
@@ -54,7 +54,7 @@ where
 impl<S> FromRequestParts<S> for User
 where
     S: Send + Sync,
-    DecodingKey: FromRef<S>
+    Arc<DecodingKey>: FromRef<S>
 {
     type Rejection = AppError;
 
@@ -74,8 +74,8 @@ where
 impl<S> FromRequestParts<S> for Admin
 where
     S: Send + Sync,
-    DecodingKey: FromRef<S>,
-    Vec<User>: FromRef<S>
+    Arc<DecodingKey>: FromRef<S>,
+    Arc<Vec<User>>: FromRef<S>
 {
     type Rejection = AppError;
 
@@ -87,25 +87,12 @@ where
         // check that the requester is authorized
         let user = User::from_request_parts(parts, state).await?;
 
-        let admins = get_admins(parts, state).await;
+        let admins = Arc::<Vec<User>>::from_ref(state);
 
         admins.binary_search(&user)
             .and(Ok(Admin(user.0)))
             .or(Err(AppError::Unauthorized))
     }
-}
-
-async fn get_admins<S>(
-    parts: &mut Parts,
-    state: &S
-) -> Vec<User>
-where
-    S: Send + Sync,
-    Vec<User>: FromRef<S>
-{
-    let Ok(v) = State::<Vec<User>>::from_request_parts(parts, state)
-        .await;
-    v.0
 }
 
 async fn get_path_iter<S>(
@@ -144,7 +131,7 @@ where
             .next_tuple()
             .ok_or(AppError::InternalError("empty path iter".into()))?;
 
-        let core: CoreArc = get_state(parts, state).await;
+        let core = CoreArc::from_ref(state);
 
         // look up the project id
         Ok(core.get_project_id(&proj).await?)
@@ -170,7 +157,7 @@ where
             .next_tuple()
             .ok_or(AppError::InternalError("empty path iter".into()))?;
 
-        let core: CoreArc = get_state(parts, state).await;
+        let core = CoreArc::from_ref(state);
 
         // look up the project, package ids
         Ok(
@@ -200,7 +187,7 @@ where
             .next_tuple()
             .ok_or(AppError::InternalError("empty path iter".into()))?;
 
-        let core: CoreArc = get_state(parts, state).await;
+        let core = CoreArc::from_ref(state);
 
         // look up the project, package, release ids
         Ok(
@@ -214,7 +201,7 @@ where
 impl<S> FromRequestParts<S> for Owned
 where
     S: Send + Sync,
-    DecodingKey: FromRef<S>,
+    Arc<DecodingKey>: FromRef<S>,
     CoreArc: FromRef<S>
 {
     type Rejection = AppError;
@@ -230,7 +217,7 @@ where
         // check that that project exists
         let proj = Project::from_request_parts(parts, state).await?;
 
-        let core: CoreArc = get_state(parts, state).await;
+        let core = CoreArc::from_ref(state);
 
         // check that that requester owns the project
         match core.user_is_owner(user, proj).await? {
@@ -257,7 +244,7 @@ where
             .next_tuple()
             .ok_or(AppError::InternalError("empty path iter".into()))?;
 
-        let core: CoreArc = get_state(parts, state).await;
+        let core = CoreArc::from_ref(state);
 
         // flag id must be an integer
         let flag = flag.parse::<i64>()
@@ -333,6 +320,7 @@ mod test {
     use axum::{
         Router,
         body::Body,
+        extract::State,
         http::{
             Method, StatusCode,
             header::AUTHORIZATION
@@ -381,7 +369,7 @@ mod test {
     #[tokio::test]
     async fn claims_from_request_parts_ok() {
         let exp = bob_ok();
-        let dkey = DecodingKey::from_secret(KEY);
+        let dkey = Arc::new(DecodingKey::from_secret(KEY));
 
         let request = Request::builder()
             .method(Method::GET)
@@ -402,7 +390,7 @@ mod test {
     #[tokio::test]
     async fn claims_from_request_parts_expired() {
         let exp = bob_expired();
-        let dkey = DecodingKey::from_secret(KEY);
+        let dkey = Arc::new(DecodingKey::from_secret(KEY));
 
         let request = Request::builder()
             .method(Method::GET)
@@ -421,7 +409,7 @@ mod test {
     #[tokio::test]
     async fn claims_from_request_parts_wrong_key() {
         let exp = bob_ok();
-        let dkey = DecodingKey::from_secret(KEY);
+        let dkey = Arc::new(DecodingKey::from_secret(KEY));
 
         let request = Request::builder()
             .method(Method::GET)
@@ -439,7 +427,7 @@ mod test {
 
     #[tokio::test]
     async fn claims_from_request_parts_no_token() {
-        let dkey = DecodingKey::from_secret(KEY);
+        let dkey = Arc::new(DecodingKey::from_secret(KEY));
 
         let request = Request::builder()
             .method(Method::GET)
@@ -457,7 +445,7 @@ mod test {
 
     #[tokio::test]
     async fn claims_from_request_parts_no_auth_header() {
-        let dkey = DecodingKey::from_secret(KEY);
+        let dkey = Arc::new(DecodingKey::from_secret(KEY));
 
         let request = Request::builder()
             .method(Method::GET)
@@ -475,7 +463,7 @@ mod test {
     #[tokio::test]
     async fn user_from_request_parts_ok() {
         let exp = bob_ok();
-        let dkey = DecodingKey::from_secret(KEY);
+        let dkey = Arc::new(DecodingKey::from_secret(KEY));
 
         let request = Request::builder()
             .method(Method::GET)
@@ -494,7 +482,7 @@ mod test {
     #[tokio::test]
     async fn user_from_request_parts_expired() {
         let exp = bob_expired();
-        let dkey = DecodingKey::from_secret(KEY);
+        let dkey = Arc::new(DecodingKey::from_secret(KEY));
 
         let request = Request::builder()
             .method(Method::GET)
@@ -513,7 +501,7 @@ mod test {
     #[tokio::test]
     async fn user_from_request_parts_wrong_key() {
         let exp = bob_ok();
-        let dkey = DecodingKey::from_secret(KEY);
+        let dkey = Arc::new(DecodingKey::from_secret(KEY));
 
         let request = Request::builder()
             .method(Method::GET)
@@ -531,7 +519,7 @@ mod test {
 
     #[tokio::test]
     async fn user_from_request_parts_no_token() {
-        let dkey = DecodingKey::from_secret(KEY);
+        let dkey = Arc::new(DecodingKey::from_secret(KEY));
 
         let request = Request::builder()
             .method(Method::GET)
@@ -549,7 +537,7 @@ mod test {
 
     #[tokio::test]
     async fn user_from_request_parts_no_auth_header() {
-        let dkey = DecodingKey::from_secret(KEY);
+        let dkey = Arc::new(DecodingKey::from_secret(KEY));
 
         let request = Request::builder()
             .method(Method::GET)
@@ -566,9 +554,9 @@ mod test {
 
     fn make_state(core: impl Core + Send + Sync + 'static) -> AppState {
         AppState {
-            key: DecodingKey::from_secret(KEY),
+            key: Arc::new(DecodingKey::from_secret(KEY)),
             core: Arc::new(core) as CoreArc,
-            admins: vec![]
+            admins: Arc::new(vec![])
         }
     }
 
