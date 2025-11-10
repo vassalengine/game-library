@@ -74,7 +74,7 @@ impl MakeSpan<Body> for SpanMaker {
     }
 }
 
-pub async fn setup_logging(log_base: &str) -> WorkerGuard {
+pub fn setup_logging(crate_name: &str, log_base: &str) -> WorkerGuard {
     // set up logging
     // TODO: make log location configurable
     let file_appender = tracing_appender::rolling::daily("", log_base);
@@ -84,6 +84,8 @@ pub async fn setup_logging(log_base: &str) -> WorkerGuard {
         .with(EnvFilter::try_from_default_env()
             .unwrap_or_else(|_| {
                 [
+                    // log calling crate at info level
+                    &format!("{}=info", crate_name),
                     // log this crate at info level
                     &format!("{}=info", env!("CARGO_CRATE_NAME")),
                     // tower_http is noisy below info

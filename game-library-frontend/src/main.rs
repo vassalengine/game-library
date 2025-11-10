@@ -244,7 +244,7 @@ async fn run() -> Result<(), StartupError> {
 #[tokio::main]
 async fn main() {
     // set up logging
-    let _guard = setup_logging("front.log");
+    let _guard = setup_logging(env!("CARGO_CRATE_NAME"), "front.log");
 
     info!("Starting");
 
