@@ -380,7 +380,7 @@ async fn run() -> Result<(), StartupError> {
 #[tokio::main]
 async fn main() {
     // set up logging
-    let _guard = setup_logging(env!("CARGO_CRATE_NAME"), "gls.log");
+    let _guard = setup_logging(env!("CARGO_CRATE_NAME"), "", "gls.log");
 
     info!("Starting");
 

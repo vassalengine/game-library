@@ -74,10 +74,14 @@ impl MakeSpan<Body> for SpanMaker {
     }
 }
 
-pub fn setup_logging(crate_name: &str, log_base: &str) -> WorkerGuard {
+pub fn setup_logging(
+    crate_name: &str,
+    log_dir: &str,
+    log_base: &str
+) -> WorkerGuard
+{
     // set up logging
-    // TODO: make log location configurable
-    let file_appender = tracing_appender::rolling::daily("", log_base);
+    let file_appender = tracing_appender::rolling::daily(log_dir, log_base);
     let (non_blocking, guard) = tracing_appender::non_blocking(file_appender);
 
     tracing_subscriber::registry()
