@@ -22,7 +22,7 @@ fn join_proj(table: &str, n: usize) -> String {
 }
 
 fn join_users(table: &str, n: usize) -> String {
-    format!(" JOIN users AS users_{n} ON users_{n}.user_id == {table}_{n}.user_id ")
+    format!(" JOIN users AS users_{n} ON users_{n}.user_id = {table}_{n}.user_id ")
 }
 
 const JOIN_FTS: &str = " JOIN projects_fts ON projects.project_id = projects_fts.rowid ";
