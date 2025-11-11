@@ -126,4 +126,11 @@ mod test {
         );
     }
 
+    #[sqlx::test(fixtures("users", "projects", "tags"))]
+    async fn get_tags_ok(pool: Pool) {
+        assert_eq!(
+            get_tags(&pool).await.unwrap(),
+            ["a".to_string(), "b".into()]
+        );
+    }
 }
