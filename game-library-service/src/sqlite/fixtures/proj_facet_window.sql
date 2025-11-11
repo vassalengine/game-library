@@ -71,8 +71,11 @@ VALUES
   (3, "c", "c", "c", 0, "abc", "", "", "abc", "", NULL, NULL, NULL, NULL, "", NULL, 0, 1, 1),
   (4, "d", "d", "d", 0, "abc", "", "", "", "", NULL, NULL, NULL, NULL, "", NULL, 0, 1, 1);
 
-INSERT INTO tags (project_id, tag)
+INSERT INTO tags (tag_id, tag)
 VALUES (1, "a");
+
+INSERT INTO projects_tags (project_id, tag_id)
+VALUES (1, 1);
 
 INSERT INTO owners (user_id, project_id)
 VALUES (1, 1);

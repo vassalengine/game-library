@@ -25,6 +25,10 @@ fn join_users(table: &str, n: usize) -> String {
     format!(" JOIN users AS users_{n} ON users_{n}.user_id = {table}_{n}.user_id ")
 }
 
+fn join_tags(table: &str, n: usize) -> String {
+    format!(" JOIN tags AS tags_{n} ON tags_{n}.tag_id = {table}_{n}.tag_id ")
+}
+
 const JOIN_FTS: &str = " JOIN projects_fts ON projects.project_id = projects_fts.rowid ";
 
 trait JoinsExt {
@@ -37,7 +41,10 @@ impl JoinsExt for &[Facet] {
             .enumerate()
             .flat_map(|(i, f)| match f {
                 Facet::Query(_) => vec![ JOIN_FTS.into() ],
-                Facet::Tag(_) => vec![ join_proj("tags", i) ],
+                Facet::Tag(_) => vec![
+                    join_proj("projects_tags", i),
+                    join_tags("projects_tags", i)
+                ],
                 Facet::Owner(_) => vec![
                     join_proj("owners", i),
                     join_users("owners", i)
