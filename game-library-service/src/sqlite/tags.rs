@@ -80,3 +80,50 @@ ORDER BY tag COLLATE NOCASE
         .await?
     )
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    type Pool = sqlx::Pool<Sqlite>;
+
+    #[sqlx::test(fixtures("users", "projects", "tags"))]
+    async fn get_project_tags_ok(pool: Pool) {
+        assert_eq!(
+            get_project_tags(&pool, Project(6)).await.unwrap(),
+            ["a".to_string(), "b".into()]
+        );
+
+    }
+
+    #[sqlx::test(fixtures("users", "projects", "tags"))]
+    async fn get_project_tags_not_a_project_ok(pool: Pool) {
+        // This should not happen; the Project passed in should be good.
+        // However, it's not an error if it does.
+        assert_eq!(
+            get_project_tags(&pool, Project(0)).await.unwrap(),
+            [] as [String; 0]
+        );
+    }
+
+    #[sqlx::test(fixtures("users", "projects", "tags"))]
+    async fn get_project_tags_at_ok(pool: Pool) {
+        assert_eq!(
+            get_project_tags_at(&pool, Project(6), 1762897247000000001)
+                .await
+                .unwrap(),
+            ["a".to_string(), "b".into()]
+        );
+    }
+
+    #[sqlx::test(fixtures("users", "projects", "tags"))]
+    async fn get_project_tags_at_not_a_project_ok(pool: Pool) {
+        // This should not happen; the Project passed in should be good.
+        // However, it's not an error if it does.
+        assert_eq!(
+            get_project_tags_at(&pool, Project(0), 0).await.unwrap(),
+            [] as [String; 0]
+        );
+    }
+
+}
