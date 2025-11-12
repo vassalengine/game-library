@@ -1,7 +1,12 @@
 .*.swp
 config.toml
+/game-library-frontend/log/
 /game-library-frontend/site/project.html
 /game-library-frontent/site/projects.html
 /game-library-service/projects.db
+/game-library-service/bak/
+/game-library-service/log/
 /target
 /user-management-service/users.db
+/user-management-service/bak/
+/user-management-service/log/
