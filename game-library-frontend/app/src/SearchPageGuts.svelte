@@ -74,5 +74,3 @@
 <ProjectList {base_url} {projects} />
 <div {@attach watchScroll} id="scroll_forward" class="infinite-scroll"></div>
 {/if}
-
-
