@@ -12,6 +12,7 @@ use crate::{
     model::{Owner, Project, User},
     sqlite::{
         require_one_modified,
+        tags::update_project_tags_in_trans,
         users::add_owner
     }
 };
@@ -308,6 +309,18 @@ where
     // associate new owner with the project
     add_owner(&mut *tx, owner, proj).await?;
 
+    // add tags
+    if !pd.tags.is_empty() {
+        update_project_tags_in_trans(
+            &mut tx,
+            Owner(owner.0),
+            proj,
+            &pd.tags,
+            &[],
+            now
+        ).await?;
+    }
+
     tx.commit().await?;
 
     Ok(())
@@ -437,6 +450,18 @@ where
     };
 
     let project_data_id = create_project_data_row(&mut *tx, &dr).await?;
+
+    // update tags if required
+    if pd.tags_add.is_some() || pd.tags_remove.is_some() {
+        update_project_tags_in_trans(
+            &mut tx,
+            owner,
+            proj,
+            pd.tags_add.as_ref().map_or(&[], |v| v),
+            pd.tags_remove.as_ref().map_or(&[], |v| v),
+            now
+        ).await?;
+    }
 
     let rr = ProjectRevisionRow {
         project_id: proj.0,
@@ -614,7 +639,10 @@ mod test {
 
     use once_cell::sync::Lazy;
 
-    use crate::input::{GameDataPost, RangePost};
+    use crate::{
+        input::{GameDataPost, RangePost},
+        sqlite::tags::get_project_tags
+    };
 
     type Pool = sqlx::Pool<Sqlite>;
 
@@ -671,7 +699,7 @@ mod test {
         ProjectDataPost {
             name: CREATE_ROW.name.clone(),
             description: CREATE_ROW.description.clone(),
-            tags: vec![],
+            tags: vec!["a".into()],
             game: GameDataPost {
                 title: CREATE_ROW.game_title.clone(),
                 title_sort_key: CREATE_ROW.game_title_sort.clone(),
@@ -714,6 +742,11 @@ mod test {
         assert_eq!(
             get_project_row(&pool, proj).await.unwrap(),
             *CREATE_ROW
+        );
+
+         assert_eq!(
+            get_project_tags(&pool, proj).await.unwrap(),
+            ["a".to_string()]
         );
     }
 

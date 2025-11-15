@@ -1,5 +1,5 @@
 use sqlx::{
-    Acquire, Executor,
+    Acquire, Executor, Transaction,
     sqlite::Sqlite
 };
 
@@ -13,7 +13,7 @@ use crate::{
 };
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-struct Tag(i64);
+pub struct Tag(pub i64);
 
 pub async fn get_tag_id<'e, E>(
     ex: E,
@@ -220,6 +220,52 @@ WHERE project_id = ?
     .and_then(require_one_modified)
 }
 
+
+pub async fn update_project_tags_in_trans<S>(
+    tx: &mut Transaction<'_, Sqlite>,
+    owner: Owner,
+    proj: Project,
+    tags_add: &[S],
+    tags_remove: &[S],
+    now: i64
+) -> Result<bool, DatabaseError>
+where
+    S: AsRef<str>
+{
+    let mut changed = false;
+
+    // remove tags
+    for tname in tags_remove {
+        // remove tag only if project was tagged
+        if let Some(tag) = get_tag_id(&mut **tx, tname.as_ref()).await? {
+            retire_project_tag_row(&mut **tx, owner, proj, tag, now).await?;
+            changed = true;
+        }
+    }
+
+    // add tags
+    for tname in tags_add {
+        let tag = get_tag_id(&mut **tx, tname.as_ref()).await?;
+
+        let tag = if let Some(tag) = tag {
+            if project_has_tag(&mut **tx, proj, tag).await? {
+                // project already tagged, don't add it
+                continue;
+            }
+            tag
+        }
+        else {
+            // new tag, create it
+            create_tag(&mut **tx, tname.as_ref()).await?
+        };
+
+        create_project_tag_row(&mut **tx, owner, proj, tag, now).await?;
+        changed = true;
+    }
+
+    Ok(changed)
+}
+
 pub async fn update_project_tags<'a, A, S>(
     conn: A,
     owner: Owner,
@@ -234,41 +280,18 @@ where
 {
     let mut tx = conn.begin().await?;
 
-    let mut changed = false;
-
-    // remove tags
-    for tname in tags_remove {
-        // remove tag only if project was tagged
-        if let Some(tag) = get_tag_id(&mut *tx, tname.as_ref()).await? {
-            retire_project_tag_row(&mut *tx, owner, proj, tag, now).await?;
-            changed = true;
-        }
-    }
-
-    // add tags
-    for tname in tags_add {
-        let tag = get_tag_id(&mut *tx, tname.as_ref()).await?;
-
-        let tag = if let Some(tag) = tag {
-            if project_has_tag(&mut *tx, proj, tag).await? {
-                // project already tagged, don't add it
-                continue;
-            }
-            tag
-        }
-        else {
-            // new tag, create it
-            create_tag(&mut *tx, tname.as_ref()).await?
-        };
-
-        create_project_tag_row(&mut *tx, owner, proj, tag, now).await?;
-        changed = true;
-    }
+    let changed = update_project_tags_in_trans(
+        &mut tx,
+        owner,
+        proj,
+        tags_add,
+        tags_remove,
+        now
+    ).await?;
 
     if changed {
         // update project to reflect the change
         update_project_non_project_data(&mut tx, owner, proj, now).await?;
-
         tx.commit().await?;
     }
 
