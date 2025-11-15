@@ -1438,6 +1438,32 @@ mod test {
     }
 
     #[test]
+    fn try_from_project_data_patch_empty_tags_add() {
+        let mpdp = MaybeProjectDataPatch {
+            tags_add: Some(vec![]),
+            ..Default::default()
+        };
+
+        assert_eq!(
+            ProjectDataPatch::try_from(mpdp.clone()).unwrap_err(),
+            ProjectDataPatchError(mpdp)
+        );
+    }
+
+    #[test]
+    fn try_from_project_data_patch_empty_tags_remove() {
+        let mpdp = MaybeProjectDataPatch {
+            tags_remove: Some(vec![]),
+            ..Default::default()
+        };
+
+        assert_eq!(
+            ProjectDataPatch::try_from(mpdp.clone()).unwrap_err(),
+            ProjectDataPatchError(mpdp)
+        );
+    }
+
+    #[test]
     fn try_from_maybe_flag_post_flag_post_inappropriate() {
         assert_eq!(
             FlagPost::try_from(MaybeFlagPost {
