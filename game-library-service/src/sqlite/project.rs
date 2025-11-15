@@ -415,13 +415,23 @@ where
         slug: &row.slug,
         description: pd.description.as_ref().unwrap_or(&row.description),
         game_title: pd.game.title.as_ref().unwrap_or(&row.game_title),
-        game_title_sort: pd.game.title_sort_key.as_ref().unwrap_or(&row.game_title_sort),
-        game_publisher: pd.game.publisher.as_ref().unwrap_or(&row.game_publisher),
+        game_title_sort: pd.game.title_sort_key.as_ref()
+            .unwrap_or(&row.game_title_sort),
+        game_publisher: pd.game.publisher.as_ref()
+            .unwrap_or(&row.game_publisher),
         game_year: pd.game.year.as_ref().unwrap_or(&row.game_year),
-        game_players_min: pd.game.players.min.unwrap_or(row.game_players_min.map(|p| p as u32)),
-        game_players_max: pd.game.players.max.unwrap_or(row.game_players_max.map(|p| p as u32)),
-        game_length_min: pd.game.length.min.unwrap_or(row.game_length_min.map(|l| l as u32)),
-        game_length_max: pd.game.length.max.unwrap_or(row.game_length_max.map(|l| l as u32)),
+        game_players_min: pd.game.players.min
+            .unwrap_or(row.game_players_min
+            .map(|p| p as u32)),
+        game_players_max: pd.game.players.max
+            .unwrap_or(row.game_players_max
+            .map(|p| p as u32)),
+        game_length_min: pd.game.length.min
+            .unwrap_or(row.game_length_min
+            .map(|l| l as u32)),
+        game_length_max: pd.game.length.max
+            .unwrap_or(row.game_length_max
+            .map(|l| l as u32)),
         readme: pd.readme.as_ref().unwrap_or(&row.readme),
         image: pd.image.as_ref().unwrap_or(&row.image).as_deref()
     };
