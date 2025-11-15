@@ -224,7 +224,8 @@ impl From<MaybeGameDataPatch> for GameDataPatch {
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct MaybeProjectDataPatch {
     pub description: Option<String>,
-    pub tags: Option<Vec<String>>,
+    pub tags_add: Option<Vec<String>>,
+    pub tags_remove: Option<Vec<String>>,
     pub game: Option<MaybeGameDataPatch>,
     pub readme: Option<String>,
     #[serde(default, deserialize_with = "double_option")]
@@ -237,7 +238,8 @@ impl MaybeProjectDataPatch {
             self,
             MaybeProjectDataPatch {
                 description: None,
-                tags: None,
+                tags_add: None,
+                tags_remove: None,
                 game: None | Some(MaybeGameDataPatch {
                     title: None,
                     publisher: None,
@@ -265,6 +267,18 @@ impl MaybeProjectDataPatch {
                 d.len() <= PROJECT_DESCRIPTION_MAX_LENGTH &&
                 d == d.trim(),
             None => true,
+        }
+        &&
+        // check tags add
+        match &self.tags_add {
+            Some(tags_add) => !tags_add.is_empty(),
+            None => true
+        }
+        &&
+        // check tags remove
+        match &self.tags_remove {
+            Some(tags_remove) => !tags_remove.is_empty(),
+            None => true
         }
         &&
         // check readme
@@ -316,7 +330,8 @@ impl MaybeProjectDataPatch {
 #[serde(try_from = "MaybeProjectDataPatch")]
 pub struct ProjectDataPatch {
     pub description: Option<String>,
-    pub tags: Option<Vec<String>>,
+    pub tags_add: Option<Vec<String>>,
+    pub tags_remove: Option<Vec<String>>,
     #[serde(default)]
     pub game: GameDataPatch,
     pub readme: Option<String>,
@@ -337,7 +352,8 @@ impl TryFrom<MaybeProjectDataPatch> for ProjectDataPatch {
             true => Ok(
                 ProjectDataPatch {
                     description: m.description,
-                    tags: m.tags,
+                    tags_add: m.tags_add,
+                    tags_remove: m.tags_remove,
                     game: m.game.unwrap_or_default().into(),
                     readme: m.readme,
                     image: m.image

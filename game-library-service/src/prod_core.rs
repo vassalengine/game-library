@@ -2746,7 +2746,8 @@ mod test {
 
         let cdata = ProjectDataPatch {
             description: Some(new_data.description.clone()),
-            tags: Some(vec![]),
+            tags_add: None,
+            tags_remove: None,
             game: GameDataPatch {
                 title: Some(new_data.game.title.clone()),
                 title_sort_key: Some(new_data.game.title_sort_key.clone()),
