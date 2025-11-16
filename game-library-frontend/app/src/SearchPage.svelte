@@ -7,6 +7,7 @@
   import SearchPageGuts from './SearchPageGuts.svelte';
   import ChipInput from './ChipInput.svelte';
   import AutocompleteInput from './AutocompleteInput.svelte';
+  import UsersInput from './UsersInput.svelte';
 
   let {
     current_version,
@@ -124,33 +125,9 @@
   );
 
   // owners, players chip inputs
-
-  const users_cache = new Map();
-  let owners_select = $state(owners.map(textToUser));
-  let players_select = $state(players.map(textToUser));
-
-  async function fetchUsersStartingWith(prefix) {
-    const url = new URL(`${ums_url}/users`);
-    url.searchParams.append('term', prefix);
-    url.searchParams.append('include_groups', false);
-    url.searchParams.append('limit', 6);
-
-    return (await fetchJSON(url)).users;
-  }
-
-  function userToText(u) {
-    return u?.username;
-  }
-
-  function textToUser(u) {
-    return { username: u };
-  }
-
-  const users_fetcher = new AutocompleteFetcher(
-    (k) => users_cache.get(k),
-    (k, v) => users_cache.set(k, v),
-    fetchUsersStartingWith
-  );
+  let users_cache = $state(new Map());
+  let owners_select = $state([]);
+  let players_select = $state([]);
 
   function loadProjects(url) {
      fetchJSON(url)
@@ -172,11 +149,11 @@
     }
 
     for (const u of owners_select) {
-      fdata.append('owner', userToText(u));
+      fdata.append('owner', u?.username);
     }
 
     for (const u of players_select) {
-      fdata.append('player', userToText(u));
+      fdata.append('player', u?.username);
     }
 
     if (fdata.get('players_min') === "0") {
@@ -314,13 +291,13 @@
     <div class="row">
       <div class="col mb-3">
         <label for="owners_input" class="form-label">Project owners</label>
-        <ChipInput fetcher={users_fetcher} itemToText={userToText} bind:items={owners_select} />
+        <UsersInput {ums_url} users={owners} bind:items={owners_select} bind:cache={users_cache} />
       </div>
     </div>
     <div class="row">
       <div class="col mb-3">
         <label for="players_input" class="form-label">Players</label>
-        <ChipInput fetcher={users_fetcher} itemToText={userToText} bind:items={players_select} />
+        <UsersInput {ums_url} users={players} bind:items={players_select} bind:cache={users_cache} />
       </div>
     </div>
     <button type="submit" aria-label="Search" class="btn btn-primary"><svg class="svg-icon"><use xlink:href="#magnifying-glass"></use></svg> Search</button>
