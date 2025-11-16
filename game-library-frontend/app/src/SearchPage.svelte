@@ -5,8 +5,8 @@
   import Header from './Header.svelte';
   import Footer from './Footer.svelte';
   import SearchPageGuts from './SearchPageGuts.svelte';
-  import ChipInput from './ChipInput.svelte';
   import AutocompleteInput from './AutocompleteInput.svelte';
+  import TagsInput from './TagsInput.svelte';
   import UsersInput from './UsersInput.svelte';
 
   let {
@@ -87,42 +87,8 @@
   );
 
   // tags chip input
-
-  let tags_cache = null;
-  let tags_select = $state(tags.map(textToTag));
-
-  async function fetchTagsContaining(s) {
-    if (tags_cache === null) {
-      const url = new URL(`${gls_url}/tags`);
-      const result = (await fetchJSON(url)).tags;
-
-      tags_cache = result
-        .map(textToTag)
-        .sort((a, b) => a.key.localeCompare(b.key));
-    }
-
-    if (!s) {
-      return [];
-    }
-
-    s = s.toLowerCase();
-    // FIXME: slow
-    return tags_cache.filter((t) => t.key.includes(s));
-  }
-
-  function tagToText(t) {
-    return t?.tag;
-  }
-
-  function textToTag(t) {
-    return { key: t.toLowerCase(), tag: t };
-  }
-
-  const tags_fetcher = new AutocompleteFetcher(
-    (k) => undefined,
-    (k, v) => {},
-    fetchTagsContaining
-  );
+  let tags_cache = $state(null);
+  let tags_select = $state([]);
 
   // owners, players chip inputs
   let users_cache = $state(new Map());
@@ -145,7 +111,7 @@
     }
 
     for (const t of tags_select) {
-      fdata.append('tag', tagToText(t));
+      fdata.append('tag', t?.tag);
     }
 
     for (const u of owners_select) {
@@ -285,7 +251,7 @@
     <div class="row">
       <div class="col mb-3">
         <label for="tags_input" class="form-label">Tags</label>
-        <ChipInput fetcher={tags_fetcher} itemToText={tagToText} bind:items={tags_select} />
+        <TagsInput {gls_url} {tags} bind:items={tags_select} bind:cache={tags_cache} />
       </div>
     </div>
     <div class="row">
