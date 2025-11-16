@@ -237,7 +237,7 @@
 {/if}
 <div class="my-2 p-2 border rounded clearfix bg-light">
 {#if edit}
-  <GameEditor {proj} {box_img} {submitEdit} {cancelEdit} />
+  <GameEditor {proj} {client} {box_img} {submitEdit} {cancelEdit} />
 {:else}
   <div class="m-3">
     <div class="row mb-3">

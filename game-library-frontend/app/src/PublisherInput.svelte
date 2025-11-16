@@ -1,11 +1,10 @@
 <script>
-  import { fetchJSON } from './lib/client.js';
   import AutocompleteFetcher from './lib/search.js';
 
   import AutocompleteInput from './AutocompleteInput.svelte';
 
   let {
-    gls_url,
+    client,
     publisher,
     item = $bindable(),
     cache = $bindable()
@@ -15,8 +14,7 @@
 
   async function fetchPublishersContaining(s) {
     if (cache === null) {
-      const url = new URL(`${gls_url}/publishers`);
-      const result = (await fetchJSON(url)).publishers;
+      const result = (await client.getPublishers()).publishers;
 
       cache = result
         .map(textToPublisher)

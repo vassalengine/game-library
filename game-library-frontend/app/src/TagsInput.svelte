@@ -1,22 +1,20 @@
 <script>
-  import { fetchJSON } from './lib/client.js';
   import AutocompleteFetcher from './lib/search.js';
 
   import ChipInput from './ChipInput.svelte';
 
   let {
-    gls_url,
+    client,
     tags,
-    items = $bindable() 
+    items = $bindable(),
+    cache = $bindable()
   } = $props();
 
-  let cache = null;
   items = tags.map(textToTag);
 
   async function fetchTagsContaining(s) {
     if (cache === null) {
-      const url = new URL(`${gls_url}/tags`);
-      const result = (await fetchJSON(url)).tags;
+      const result = (await client.getTags()).tags;
 
       cache = result
         .map(textToTag)
@@ -45,7 +43,6 @@
     (k, v) => {},
     fetchTagsContaining
   );
-
 </script>
 
 <ChipInput {fetcher} {itemToText} bind:items={items} />

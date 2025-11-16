@@ -91,7 +91,7 @@
     </button>
   </h2>
 {#if edit}
-  <ProjectEditor {ums_url} {proj} {submitEdit} {cancelEdit} />
+  <ProjectEditor {client} {proj} {submitEdit} {cancelEdit} />
 {:else}
   {@const now = new Date()}
   <div>

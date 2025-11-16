@@ -1,5 +1,5 @@
 <script>
-  import { fetchJSON } from './lib/client.js';
+  import Client, { fetchJSON } from './lib/client.js';
   import { cleanupSearch, makeRequestURL } from './lib/search.js';
 
   import Header from './Header.svelte';
@@ -24,6 +24,14 @@
   let error = $state(null);
   let meta = $state(null);
   let projects = $state(null);
+
+  const client = new Client(
+    gls_url,
+    ums_url,
+    null,
+    null,
+    null
+  );
 
   const params = new URLSearchParams(window.location.search);
 
@@ -171,7 +179,7 @@
     <div class="row">
       <div class="col mb-3">
         <label for="publisher_input" class="form-label">Publisher</label>
-        <PublisherInput {gls_url} {publisher} bind:item={publisher_select} bind:cache={publishers_cache} />
+        <PublisherInput {client} {publisher} bind:item={publisher_select} bind:cache={publishers_cache} />
       </div>
       <div class="col mb-3">
         <label for="year_input" class="form-label">Year</label>
@@ -217,19 +225,19 @@
     <div class="row">
       <div class="col mb-3">
         <label for="tags_input" class="form-label">Tags</label>
-        <TagsInput {gls_url} {tags} bind:items={tags_select} bind:cache={tags_cache} />
+        <TagsInput {client} {tags} bind:items={tags_select} bind:cache={tags_cache} />
       </div>
     </div>
     <div class="row">
       <div class="col mb-3">
         <label for="owners_input" class="form-label">Project owners</label>
-        <UsersInput {ums_url} users={owners} bind:items={owners_select} bind:cache={users_cache} />
+        <UsersInput {client} users={owners} bind:items={owners_select} bind:cache={users_cache} />
       </div>
     </div>
     <div class="row">
       <div class="col mb-3">
         <label for="players_input" class="form-label">Players</label>
-        <UsersInput {ums_url} users={players} bind:items={players_select} bind:cache={users_cache} />
+        <UsersInput {client} users={players} bind:items={players_select} bind:cache={users_cache} />
       </div>
     </div>
     <button type="submit" aria-label="Search" class="btn btn-primary"><svg class="svg-icon"><use xlink:href="#magnifying-glass"></use></svg> Search</button>

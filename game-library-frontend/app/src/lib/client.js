@@ -430,6 +430,22 @@ class Client {
       }
     );
   }
+
+  async getPublishers() {
+    return this.fetchJSON(`${this.gls_api}/publishers`);
+  }
+
+  async getTags() {
+    return this.fetchJSON(`${this.gls_api}/tags`);
+  }
+
+  async getUsersStartingWith(prefix) {
+    const url = new URL(`${this.ums_api}/users`);
+    url.searchParams.append('term', prefix);
+    url.searchParams.append('include_groups', false);
+    url.searchParams.append('limit', 6);
+    return this.fetchJSON(url);
+  }
 }
 
 export default Client;
