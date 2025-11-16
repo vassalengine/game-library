@@ -35,7 +35,6 @@
     (k, v) => cache.set(k, v),
     fetchUsersStartingWith
   );
-
 </script>
 
 <ChipInput {fetcher} {itemToText} bind:items={items} />
