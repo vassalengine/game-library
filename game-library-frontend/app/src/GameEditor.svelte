@@ -304,7 +304,7 @@
         <input id="game_length_max_input" type="number" min="1" step="1" name="game_length_max" class="form-control" oninput={validateLengthMax} bind:value={length_max}>
       </div>
       <div class="col-12">
-        <label for="tags_input" class="form-label">Tags</label>
+        <label class="form-label">Tags</label>
         <TagsInput {client} tags={proj.tags} bind:items={tags_select} bind:cache={tags_cache} />
         {#each tags_select as t (t.tag)}
         <input type="hidden" name="tag" value={t.tag} />
