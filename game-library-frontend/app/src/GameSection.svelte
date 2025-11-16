@@ -146,6 +146,24 @@
       data.image = null;
     }
 
+    // check for updates to tags
+    const tags = fdata.getAll('tag');
+    if (tags.length > 0) {
+      const tags_old = new Set(proj.tags);
+      const tags_new = new Set(tags);
+
+      const tags_add = tags_new.difference(tags_old);
+      const tags_remove = tags_old.difference(tags_new);
+
+      if (tags_add.size > 0) {
+        data.tags_add = [...tags_add];
+      }
+
+      if (tags_remove.size > 0) {
+        data.tags_remove = [...tags_remove];
+      }
+    }
+
     // submit changes only if there are some
     if (Object.keys(data).length > 0) {
       if (data.image) {

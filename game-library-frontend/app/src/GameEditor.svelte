@@ -1,6 +1,9 @@
 <script>
+  import TagsInput from './TagsInput.svelte';
+
   let {
     proj,
+    client,
     box_img = $bindable(),
     submitEdit,
     cancelEdit
@@ -130,6 +133,10 @@
   function validateLengthMax(event) {
     validateRange(event, length_min, event.target.valueAsNumber, 'length');
   }
+
+  // tags chip input
+  let tags_cache = $state(null);
+  let tags_select = $state([]);
 
 </script>
 
@@ -295,6 +302,13 @@
       <div class="col-3">
         <label for="game_length_max_input" class="form-label">Maximum Length</label>
         <input id="game_length_max_input" type="number" min="1" step="1" name="game_length_max" class="form-control" oninput={validateLengthMax} bind:value={length_max}>
+      </div>
+      <div class="col-12">
+        <label for="tags_input" class="form-label">Tags</label>
+        <TagsInput {client} tags={proj.tags} bind:items={tags_select} bind:cache={tags_cache} />
+        {#each tags_select as t (t.tag)}
+        <input type="hidden" name="tag" value={t.tag} />
+        {/each}
       </div>
       <div class="col-12">
         <label for="description_input" class="form-label">Description</label>
