@@ -148,7 +148,6 @@
 
     // submit changes only if there are some
     if (Object.keys(data).length > 0) {
-
       if (data.image) {
         data.image = box_image.name;
 
