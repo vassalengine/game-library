@@ -1,11 +1,11 @@
 <script>
   import { fetchJSON } from './lib/client.js';
-  import AutocompleteFetcher, { cleanupSearch, makeRequestURL } from './lib/search.js';
+  import { cleanupSearch, makeRequestURL } from './lib/search.js';
 
   import Header from './Header.svelte';
   import Footer from './Footer.svelte';
   import SearchPageGuts from './SearchPageGuts.svelte';
-  import AutocompleteInput from './AutocompleteInput.svelte';
+  import PublisherInput from './PublisherInput.svelte';
   import TagsInput from './TagsInput.svelte';
   import UsersInput from './UsersInput.svelte';
 
@@ -49,42 +49,8 @@
   );
 
   // publishers input
-
-  let publishers_cache = null;
-  let publisher_select = $state(publisher ? textToPublisher(publisher) : null);
-
-  async function fetchPublishersContaining(s) {
-    if (publishers_cache === null) {
-      const url = new URL(`${gls_url}/publishers`);
-      const result = (await fetchJSON(url)).publishers;
-
-      publishers_cache = result
-        .map(textToPublisher)
-        .sort((a, b) => a.key.localeCompare(b.key));
-    }
-
-    if (!s) {
-      return [];
-    }
-
-    s = s.toLowerCase();
-    // FIXME: slow
-    return publishers_cache.filter((t) => t.key.includes(s));
-  }
-
-  function publisherToText(p) {
-    return p?.publisher ?? '';
-  }
-
-  function textToPublisher(p) {
-    return { key: p.toLowerCase(), publisher: p };
-  }
-
-  const publishers_fetcher = new AutocompleteFetcher(
-    (k) => undefined,
-    (k, v) => {},
-    fetchPublishersContaining
-  );
+  let publishers_cache = $state(null);
+  let publisher_select = $state(null);
 
   // tags chip input
   let tags_cache = $state(null);
@@ -107,7 +73,7 @@
     const fdata = event.formData;
 
     if (publisher_select) {
-      fdata.set('publisher', publisherToText(publisher_select));
+      fdata.set('publisher', publisher_select?.publisher ?? '');
     }
 
     for (const t of tags_select) {
@@ -205,7 +171,7 @@
     <div class="row">
       <div class="col mb-3">
         <label for="publisher_input" class="form-label">Publisher</label>
-        <AutocompleteInput fetcher={publishers_fetcher} itemToText={publisherToText} bind:value={publisher_select} />
+        <PublisherInput {gls_url} {publisher} bind:item={publisher_select} bind:cache={publishers_cache} />
       </div>
       <div class="col mb-3">
         <label for="year_input" class="form-label">Year</label>
