@@ -140,22 +140,21 @@ async fn project_has_tag<'e, E>(
 where
     E: Executor<'e, Database = Sqlite>
 {
-    Ok(
-        sqlx::query_scalar!(
-            "
+    let count = sqlx::query_scalar!(
+        "
 SELECT COUNT(1)
 FROM projects_tags
 WHERE project_id = ?
     AND tag_id = ?
 LIMIT 1
-            ",
-            proj.0,
-            tag.0
-        )
-        .fetch_optional(ex)
-        .await?
-        .is_some()
+        ",
+        proj.0,
+        tag.0
     )
+    .fetch_one(ex)
+    .await?;
+
+    Ok(count == 1)
 }
 
 async fn create_project_tag_row<'e, E>(
@@ -238,8 +237,10 @@ where
     for tname in tags_remove {
         // remove tag only if project was tagged
         if let Some(tag) = get_tag_id(&mut **tx, tname.as_ref()).await? {
-            retire_project_tag_row(&mut **tx, owner, proj, tag, now).await?;
-            changed = true;
+            if project_has_tag(&mut **tx, proj, tag).await? {
+                retire_project_tag_row(&mut **tx, owner, proj, tag, now).await?;
+                changed = true;
+            }
         }
     }
 
@@ -256,7 +257,9 @@ where
         }
         else {
             // new tag, create it
-            create_tag(&mut **tx, tname.as_ref()).await?
+// TODO: reenable when we permit tag creation
+//            create_tag(&mut **tx, tname.as_ref()).await?
+            return Err(DatabaseError::NotFound);
         };
 
         create_project_tag_row(&mut **tx, owner, proj, tag, now).await?;
@@ -315,7 +318,7 @@ mod test {
     #[sqlx::test(fixtures("users", "projects", "tags"))]
     async fn get_tag_id_none(pool: Pool) {
         assert_eq!(
-            get_tag_id(&pool, "c").await.unwrap(),
+            get_tag_id(&pool, "d").await.unwrap(),
             None
         );
     }
@@ -324,7 +327,7 @@ mod test {
     async fn get_tags_ok(pool: Pool) {
         assert_eq!(
             get_tags(&pool).await.unwrap(),
-            ["a".to_string(), "b".into()]
+            ["a".to_string(), "b".into(), "c".into()]
         );
     }
 
@@ -347,7 +350,7 @@ mod test {
     async fn create_tag_already_exists(pool: Pool) {
         assert_eq!(
             get_tags(&pool).await.unwrap(),
-            ["a".to_string(), "b".into()]
+            ["a".to_string(), "b".into(), "c".into()]
         );
 
         assert_eq!(
@@ -394,6 +397,23 @@ mod test {
         );
     }
 
+   #[sqlx::test(fixtures("users", "projects", "tags"))]
+    async fn project_has_tag_yes(pool: Pool) {
+        assert!(project_has_tag(&pool, Project(6), Tag(1)).await.unwrap());
+    }
+
+   #[sqlx::test(fixtures("users", "projects", "tags"))]
+    async fn project_has_tag_no(pool: Pool) {
+        assert!(!project_has_tag(&pool, Project(6), Tag(4)).await.unwrap());
+    }
+
+    #[sqlx::test(fixtures("users", "projects", "tags"))]
+    async fn project_has_tag_not_a_project_ok(pool: Pool) {
+        // This should not happen; the Project passed in should be good.
+        // However, it's not an error if it does.
+        assert!(!project_has_tag(&pool, Project(0), Tag(1)).await.unwrap());
+    }
+
     #[sqlx::test(fixtures("users", "projects", "tags"))]
     async fn update_project_tags_remove(pool: Pool) {
         assert_eq!(
@@ -416,8 +436,33 @@ mod test {
         );
     }
 
+// TODO: reenable when we permit tag creation
+/*
     #[sqlx::test(fixtures("users", "projects", "tags"))]
-    async fn update_project_tags_add(pool: Pool) {
+    async fn update_project_tags_add_new_tag(pool: Pool) {
+        assert_eq!(
+            get_project_tags(&pool, Project(6)).await.unwrap(),
+            ["a".to_string(), "b".into()]
+        );
+
+        update_project_tags(
+            &pool,
+            Owner(1),
+            Project(6),
+            &["d".to_string()],
+            &[],
+            1762897247000000001
+        ).await.unwrap();
+
+        assert_eq!(
+            get_project_tags(&pool, Project(6)).await.unwrap(),
+            ["a".to_string(), "b".into(), "d".into()]
+        );
+    }
+*/
+
+    #[sqlx::test(fixtures("users", "projects", "tags"))]
+    async fn update_project_tags_add_existing_tag(pool: Pool) {
         assert_eq!(
             get_project_tags(&pool, Project(6)).await.unwrap(),
             ["a".to_string(), "b".into()]
@@ -461,7 +506,7 @@ mod test {
     }
 
     #[sqlx::test(fixtures("users", "projects", "tags"))]
-    async fn update_project_tags_add_already_exitsts(pool: Pool) {
+    async fn update_project_tags_add_already_has(pool: Pool) {
         assert_eq!(
             get_project_tags(&pool, Project(6)).await.unwrap(),
             ["a".to_string(), "b".into()]
@@ -483,7 +528,7 @@ mod test {
     }
 
     #[sqlx::test(fixtures("users", "projects", "tags"))]
-    async fn update_project_tags_remove_does_not_exist(pool: Pool) {
+    async fn update_project_tags_remove_does_not_have(pool: Pool) {
         assert_eq!(
             get_project_tags(&pool, Project(6)).await.unwrap(),
             ["a".to_string(), "b".into()]
@@ -538,7 +583,9 @@ mod test {
                 &[],
                 0
             ).await.unwrap_err(),
-            DatabaseError::SqlxError(_)
+// TODO: reenable when we permit tag creation
+//            DatabaseError::SqlxError(_)
+            DatabaseError::NotFound
         ));
     }
 
@@ -554,7 +601,9 @@ mod test {
                 &[],
                 0
             ).await.unwrap_err(),
-            DatabaseError::SqlxError(_)
+// TODO: reenable when we permit tag creation
+//            DatabaseError::SqlxError(_)
+            DatabaseError::NotFound
         ));
     }
 }

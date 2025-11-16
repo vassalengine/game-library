@@ -1,7 +1,8 @@
 INSERT INTO tags (tag_id, tag)
 VALUES
   (1, "a"),
-  (2, "b");
+  (2, "b"),
+  (3, "c");
 
 INSERT INTO projects_tags_history (
   project_id,

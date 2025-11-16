@@ -719,6 +719,8 @@ mod test {
         }
     );
 
+// TODO: reenable when we permit tag creation
+/*
     #[sqlx::test(fixtures("users"))]
     async fn create_project_ok(pool: Pool) {
         assert_eq!(
@@ -749,6 +751,7 @@ mod test {
             ["a".to_string()]
         );
     }
+*/
 
     #[sqlx::test(fixtures("users"))]
     async fn create_project_not_a_user(pool: Pool) {
