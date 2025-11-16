@@ -1,6 +1,5 @@
 <script>
   import { getCookie, isValidProjectName, slugFor } from './lib/util.js';
-
   import Client from './lib/client.js';
 
   import Header from './Header.svelte';
