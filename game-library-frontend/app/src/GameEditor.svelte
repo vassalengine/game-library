@@ -304,6 +304,7 @@
         <input id="game_length_max_input" type="number" min="1" step="1" name="game_length_max" class="form-control" oninput={validateLengthMax} bind:value={length_max}>
       </div>
       <div class="col-12">
+        <!-- svelte-ignore a11y_label_has_associated_control -->
         <label class="form-label">Tags</label>
         <TagsInput {client} tags={proj.tags} bind:items={tags_select} bind:cache={tags_cache} />
         {#each tags_select as t (t.tag)}

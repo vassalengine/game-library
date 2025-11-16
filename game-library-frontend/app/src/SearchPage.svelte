@@ -224,18 +224,21 @@
     </div>
     <div class="row">
       <div class="col mb-3">
+        <!-- svelte-ignore a11y_label_has_associated_control -->
         <label class="form-label">Tags</label>
         <TagsInput {client} {tags} bind:items={tags_select} bind:cache={tags_cache} />
       </div>
     </div>
     <div class="row">
       <div class="col mb-3">
+        <!-- svelte-ignore a11y_label_has_associated_control -->
         <label class="form-label">Project owners</label>
         <UsersInput {client} users={owners} bind:items={owners_select} bind:cache={users_cache} />
       </div>
     </div>
     <div class="row">
       <div class="col mb-3">
+        <!-- svelte-ignore a11y_label_has_associated_control -->
         <label class="form-label">Players</label>
         <UsersInput {client} users={players} bind:items={players_select} bind:cache={users_cache} />
       </div>
