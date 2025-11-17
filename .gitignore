@@ -3,10 +3,13 @@ config.toml
 /game-library-frontend/log/
 /game-library-frontend/site/project.html
 /game-library-frontent/site/projects.html
+/game-library-frontend/target/
 /game-library-service/projects.db
 /game-library-service/bak/
 /game-library-service/log/
-/target
+/game-library-service/target/
+/target/
 /user-management-service/users.db
 /user-management-service/bak/
 /user-management-service/log/
+/user-management-service/target/
