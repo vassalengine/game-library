@@ -12,6 +12,20 @@ VALUES
     1573573806419538067
   );
 
+INSERT INTO publishers (
+  publisher_id,
+  name
+)
+VALUES
+  (
+    1,
+    "Test Game Company"
+  ),
+  (
+    2,
+    "XYZ"
+  );
+
 INSERT INTO projects_data (
   project_data_id,
   project_id,
@@ -20,7 +34,7 @@ INSERT INTO projects_data (
   description,
   game_title,
   game_title_sort,
-  game_publisher,
+  game_publisher_id,
   game_year,
   game_players_min,
   game_players_max,
@@ -38,7 +52,7 @@ VALUES
     "Brian's Trademarked Game of Being a Test Case",
     "A Game of Tests",
     "game of tests, a",
-    "Test Game Company",
+    1,
     "1978",
     NULL,
     3,
@@ -55,7 +69,7 @@ VALUES
     "Brian's Trademarked Game of Being a Test Case",
     "A Game of Tests",
     "game of tests, a",
-    "Test Game Company",
+    1,
     "1979",
     NULL,
     3,
@@ -72,7 +86,7 @@ VALUES
     "Another game",
     "Some Other Game",
     "some other game",
-    "XYZ",
+    2,
     "1993",
     NULL,
     NULL,
@@ -122,6 +136,7 @@ INSERT INTO projects (
   description,
   game_title,
   game_title_sort,
+  game_publisher_id,
   game_publisher,
   game_year,
   game_players_min,
@@ -144,6 +159,7 @@ VALUES
     "Brian's Trademarked Game of Being a Test Case",
     "A Game of Tests",
     "game of tests, a",
+    1,
     "Test Game Company",
     "1979",
     NULL,
@@ -165,6 +181,7 @@ VALUES
     "Another game",
     "Some Other Game",
     "some other game",
+    2,
     "XYZ",
     "1993",
     NULL,

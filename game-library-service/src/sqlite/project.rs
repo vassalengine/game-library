@@ -12,6 +12,7 @@ use crate::{
     model::{Owner, Project, User},
     sqlite::{
         require_one_modified,
+        publishers::{Publisher, get_publisher_id, get_or_create_publisher, create_publisher},
         tags::update_project_tags_in_trans,
         users::add_owner
     }
@@ -92,6 +93,7 @@ async fn create_project_row<'e, E>(
     proj: Project,
     slug: &str,
     proj_data: &ProjectDataPost,
+    publisher: Publisher,
     now: i64
 ) -> Result<(), DatabaseError>
 where
@@ -110,6 +112,7 @@ INSERT INTO projects (
     description,
     game_title,
     game_title_sort,
+    game_publisher_id,
     game_publisher,
     game_year,
     game_players_min,
@@ -122,7 +125,7 @@ INSERT INTO projects (
     modified_by,
     revision
 )
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ",
         proj.0,
         proj_data.name,
@@ -132,6 +135,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         proj_data.description,
         proj_data.game.title,
         proj_data.game.title_sort_key,
+        publisher.0,
         proj_data.game.publisher,
         proj_data.game.year,
         proj_data.game.players.min,
@@ -159,7 +163,7 @@ struct ProjectDataRow<'a> {
     description: &'a str,
     game_title: &'a str,
     game_title_sort: &'a str,
-    game_publisher: &'a str,
+    game_publisher_id: i64,
     game_year: &'a str,
     game_players_min: Option<u32>,
     game_players_max: Option<u32>,
@@ -186,7 +190,7 @@ INSERT INTO projects_data (
     description,
     game_title,
     game_title_sort,
-    game_publisher,
+    game_publisher_id,
     game_year,
     game_players_min,
     game_players_max,
@@ -204,7 +208,7 @@ RETURNING project_data_id
             row.description,
             row.game_title,
             row.game_title_sort,
-            row.game_publisher,
+            row.game_publisher_id,
             row.game_year,
             row.game_players_min,
             row.game_players_max,
@@ -269,6 +273,12 @@ where
 {
     let mut tx = conn.begin().await?;
 
+    // get the publisher id
+    let publisher = get_or_create_publisher(
+        &mut tx,
+        &pd.game.publisher
+    ).await?;
+
     // create project history row
     let proj = create_project_history_row(&mut *tx, now).await?;
 
@@ -280,7 +290,7 @@ where
         description: &pd.description,
         game_title: &pd.game.title,
         game_title_sort: &pd.game.title_sort_key,
-        game_publisher:  &pd.game.publisher,
+        game_publisher_id: publisher.0,
         game_year: &pd.game.year,
         game_players_min: pd.game.players.min,
         game_players_max: pd.game.players.max,
@@ -304,7 +314,7 @@ where
     create_project_revision_row(&mut *tx, &rr).await?;
 
     // create project
-    create_project_row(&mut *tx, owner, proj, slug, pd, now).await?;
+    create_project_row(&mut *tx, owner, proj, slug, pd, publisher, now).await?;
 
     // associate new owner with the project
     add_owner(&mut *tx, owner, proj).await?;
@@ -332,6 +342,7 @@ async fn update_project_row<'e, E>(
     proj: Project,
     revision: i64,
     pd: &ProjectDataPatch,
+    publisher: Option<Publisher>,
     now: i64
 ) -> Result<(), DatabaseError>
 where
@@ -363,8 +374,13 @@ where
         qbs.push("game_title_sort = ").push_bind_unseparated(game_title_sort);
     }
 
-    if let Some(game_publisher) = &pd.game.publisher {
-        qbs.push("game_publisher = ").push_bind_unseparated(game_publisher);
+    if let Some(publisher) = publisher &&
+        let Some(game_publisher) = &pd.game.publisher
+    {
+        qbs.push("game_publisher_id = ")
+            .push_bind_unseparated(publisher.0)
+            .push("game_publisher = ")
+            .push_bind_unseparated(game_publisher);
     }
 
     if let Some(game_year) = &pd.game.year {
@@ -421,6 +437,12 @@ where
     let row = get_project_row(&mut *tx, proj).await?;
     let revision = row.revision + 1;
 
+    // get publisher id if publisher changed
+    let publisher = match &pd.game.publisher {
+        Some(pname) => get_or_create_publisher(&mut tx, pname).await?,
+        None => Publisher(row.game_publisher_id)
+    };
+
     // create project data
     let dr = ProjectDataRow {
         project_id: proj.0,
@@ -430,8 +452,7 @@ where
         game_title: pd.game.title.as_ref().unwrap_or(&row.game_title),
         game_title_sort: pd.game.title_sort_key.as_ref()
             .unwrap_or(&row.game_title_sort),
-        game_publisher: pd.game.publisher.as_ref()
-            .unwrap_or(&row.game_publisher),
+        game_publisher_id: publisher.0,
         game_year: pd.game.year.as_ref().unwrap_or(&row.game_year),
         game_players_min: pd.game.players.min
             .unwrap_or(row.game_players_min
@@ -475,7 +496,15 @@ where
     create_project_revision_row(&mut *tx, &rr).await?;
 
     // update project
-    update_project_row(&mut *tx, owner, proj, revision, pd, now).await?;
+    update_project_row(
+        &mut *tx,
+        owner,
+        proj,
+        revision,
+        pd,
+        pd.game.publisher.as_ref().map(|_| publisher),
+        now
+    ).await?;
 
     tx.commit().await?;
 
@@ -503,6 +532,7 @@ SELECT
     modified_by,
     game_title,
     game_title_sort,
+    game_publisher_id,
     game_publisher,
     game_year,
     game_players_min,
@@ -544,7 +574,8 @@ SELECT
     projects_revisions.modified_by,
     projects_data.game_title,
     projects_data.game_title_sort,
-    projects_data.game_publisher,
+    projects_data.game_publisher_id,
+    publishers.name AS game_publisher,
     projects_data.game_year,
     projects_data.game_players_min,
     projects_data.game_players_max,
@@ -557,6 +588,8 @@ JOIN projects_data
 ON projects_revisions.project_data_id = projects_data.project_data_id
 JOIN projects_history
 ON projects_revisions.project_id = projects_history.project_id
+JOIN publishers
+ON projects_data.game_publisher_id = publishers.publisher_id
 WHERE projects_revisions.project_id = ?
     AND projects_revisions.revision = ?
 LIMIT 1
@@ -627,6 +660,7 @@ pub async fn update_project_non_project_data(
         proj,
         revision,
         &Default::default(),
+        None,
         now
     ).await?;
 
@@ -684,6 +718,7 @@ mod test {
             modified_by: 1,
             game_title: "A Game of Tests".into(),
             game_title_sort: "Game of Tests, A".into(),
+            game_publisher_id: 1,
             game_publisher: "Test Game Company".into(),
             game_year: "1979".into(),
             game_players_min: None,
@@ -987,6 +1022,7 @@ mod test {
             modified_by: 1,
             game_title: "A Game of Tests".into(),
             game_title_sort: "game of tests, a".into(),
+            game_publisher_id: 1,
             game_publisher: "Test Game Company".into(),
             game_year: "1979".into(),
             game_players_min: None,
@@ -1010,6 +1046,7 @@ mod test {
             modified_by: 1,
             game_title: "A Game of Tests".into(),
             game_title_sort: "game of tests, a".into(),
+            game_publisher_id: 1,
             game_publisher: "Test Game Company".into(),
             game_year: "1978".into(),
             game_players_min: None,

@@ -84,6 +84,7 @@ pub struct ProjectRow {
     pub modified_by: i64,
     pub game_title: String,
     pub game_title_sort: String,
+    pub game_publisher_id: i64,
     pub game_publisher: String,
     pub game_year: String,
     pub game_players_min: Option<i64>,
