@@ -72,16 +72,16 @@ where
                 self.push(" projects_fts MATCH ")
                     .push_bind_unseparated(fts5_quote(q)),
             Facet::Publisher(p) =>
-                self.push(" projects.game_publisher == ")
+                self.push(" projects.game_publisher = ")
                     .push_bind_unseparated(p),
             Facet::Year(y) =>
-                self.push(" projects.game_year == ")
+                self.push(" projects.game_year = ")
                     .push_bind_unseparated(y),
             Facet::PlayersMin(m) =>
-                self.push(" projects.game_players_min == ")
+                self.push(" projects.game_players_min = ")
                     .push_bind_unseparated(m),
             Facet::PlayersMax(m) =>
-                self.push(" projects.game_players_max == ")
+                self.push(" projects.game_players_max = ")
                     .push_bind_unseparated(m),
             Facet::PlayersInc(m) =>
                 self.push_bind(m)
@@ -93,11 +93,11 @@ where
                 self.push(" projects.game_length_max <= ")
                     .push_bind_unseparated(m),
             Facet::Tag(t) =>
-                self.push(format!(" tags_{i}.tag == "))
+                self.push(format!(" tags_{i}.tag = "))
                     .push_bind_unseparated(t),
             Facet::Owner(u) |
             Facet::Player(u) =>
-                self.push(format!(" users_{i}.username == "))
+                self.push(format!(" users_{i}.username = "))
                     .push_bind_unseparated(u)
         }
     }
