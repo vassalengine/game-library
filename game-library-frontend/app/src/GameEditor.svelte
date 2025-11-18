@@ -1,4 +1,5 @@
 <script>
+  import PublisherInput from './PublisherInput.svelte';
   import TagsInput from './TagsInput.svelte';
 
   let {
@@ -133,6 +134,10 @@
   function validateLengthMax(event) {
     validateRange(event, length_min, event.target.valueAsNumber, 'length');
   }
+
+  // publisher input
+  let publishers_cache = $state(null);
+  let publisher_select = $state(null);
 
   // tags chip input
   let tags_cache = $state(null);
@@ -280,8 +285,10 @@
         <input id="game_title_sort_key_input" type="text" name="game_title_sort_key" class="form-control" readonly disabled value={sortKeyFor(game_title.trim())}>
       </div>
       <div class="col-8">
-        <label for="game_publisher_input" class="form-label">Publisher</label>
-        <input id="game_publisher_input" type="text" name="game_publisher" class="form-control" value={proj.game.publisher}>
+        <!-- svelte-ignore a11y_label_has_associated_control -->
+        <label class="form-label">Publisher</label>
+        <PublisherInput {client} publisher={proj.game.publisher} bind:item={publisher_select} bind:cache={publishers_cache} allowNew={true} />
+        <input type="hidden" name="game_publisher" value={publisher_select} />
       </div>
       <div class="col-4">
         <label for="game_year_input" class="form-label">Year</label>
