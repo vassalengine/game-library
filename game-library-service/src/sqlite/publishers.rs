@@ -83,3 +83,77 @@ pub async fn get_or_create_publisher(
         None => create_publisher(&mut **tx, publisher).await
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    type Pool = sqlx::Pool<Sqlite>;
+
+    #[sqlx::test(fixtures("users", "projects"))]
+    async fn get_publisher_id_some(pool: Pool) {
+        assert_eq!(
+            get_publisher_id(&pool, "XYZ").await.unwrap(),
+            Some(Publisher(2))
+        );
+    }
+
+    #[sqlx::test(fixtures("users", "projects"))]
+    async fn get_tag_id_none(pool: Pool) {
+        assert_eq!(
+            get_publisher_id(&pool, "bogus").await.unwrap(),
+            None
+        );
+    }
+
+    #[sqlx::test(fixtures("users", "projects"))]
+    async fn get_publishers_ok(pool: Pool) {
+        assert_eq!(
+            get_publishers(&pool).await.unwrap(),
+            ["Test Game Company".to_string(), "XYZ".into()]
+        );
+    }
+
+    #[sqlx::test]
+    async fn create_publisher_ok(pool: Pool) {
+        assert_eq!(
+            get_publishers(&pool).await.unwrap(),
+            [] as [String; 0]
+        );
+
+        let publisher = create_publisher(&pool, "x").await.unwrap();
+
+        assert_eq!(publisher, Publisher(1));
+        assert_eq!(
+            get_publishers(&pool).await.unwrap(),
+            ["x".to_string()]
+        );
+    }
+
+    #[sqlx::test(fixtures("users", "projects"))]
+    async fn create_publisher_already_exists(pool: Pool) {
+        assert_eq!(
+            get_publishers(&pool).await.unwrap(),
+            ["Test Game Company".to_string(), "XYZ".into()]
+        );
+
+        assert_eq!(
+            create_publisher(&pool, "XYZ").await.unwrap_err(),
+            DatabaseError::AlreadyExists
+        );
+    }
+
+    #[sqlx::test(fixtures("users", "projects"))]
+    async fn get_or_create_publisher_get(pool: Pool) {
+        assert_eq!(
+            get_publishers(&pool).await.unwrap(),
+            ["Test Game Company".to_string(), "XYZ".into()]
+        );
+
+        let mut tx = pool.begin().await.unwrap();
+        assert_eq!(
+            get_or_create_publisher(&mut tx, "XYZ").await.unwrap(),
+            Publisher(2)
+        );
+    }
+}
