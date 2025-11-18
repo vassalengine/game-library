@@ -288,7 +288,7 @@
         <!-- svelte-ignore a11y_label_has_associated_control -->
         <label class="form-label">Publisher</label>
         <PublisherInput {client} publisher={proj.game.publisher} bind:item={publisher_select} bind:cache={publishers_cache} allowNew={true} />
-        <input type="hidden" name="game_publisher" value={publisher_select} />
+        <input type="hidden" name="game_publisher" value={publisher_select?.publisher ?? ''} />
       </div>
       <div class="col-4">
         <label for="game_year_input" class="form-label">Year</label>
