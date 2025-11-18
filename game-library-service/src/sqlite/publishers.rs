@@ -13,12 +13,15 @@ pub async fn get_publishers<'e, E>(
 where
     E: Executor<'e, Database = Sqlite>
 {
+    // return publishers in use now
     Ok(
         sqlx::query_scalar!(
             "
-SELECT name
+SELECT DISTINCT publishers.name
 FROM publishers
-ORDER BY name COLLATE NOCASE
+JOIN projects
+ON publishers.publisher_id = projects.game_publisher_id
+ORDER BY publishers.name COLLATE NOCASE
             "
         )
         .fetch_all(ex)

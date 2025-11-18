@@ -78,6 +78,28 @@ ORDER BY tag COLLATE NOCASE
     )
 }
 
+pub async fn get_tags_active<'e, E>(
+    ex: E
+) -> Result<Vec<String>, DatabaseError>
+where
+    E: Executor<'e, Database = Sqlite>
+{
+    // return tags in use now
+    Ok(
+        sqlx::query_scalar!(
+            "
+SELECT DISTINCT tags.tag
+FROM tags
+JOIN projects_tags
+ON tags.tag_id = projects_tags.tag_id
+ORDER BY tag COLLATE NOCASE
+            "
+        )
+        .fetch_all(ex)
+        .await?
+    )
+}
+
 pub async fn get_project_tags<'e, E>(
     ex: E,
     proj: Project
@@ -320,6 +342,14 @@ mod test {
         assert_eq!(
             get_tag_id(&pool, "d").await.unwrap(),
             None
+        );
+    }
+
+    #[sqlx::test(fixtures("users", "projects", "tags"))]
+    async fn get_tags_active_ok(pool: Pool) {
+        assert_eq!(
+            get_tags_active(&pool).await.unwrap(),
+            ["a".to_string(), "b".into()]
         );
     }
 

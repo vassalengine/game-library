@@ -546,6 +546,13 @@ impl DatabaseClient for SqlxDatabaseClient<Sqlite> {
         tags::get_tags(&self.0).await
     }
 
+    async fn get_tags_active(
+        &self
+    ) -> Result<Vec<String>, DatabaseError>
+    {
+        tags::get_tags_active(&self.0).await
+    }
+
     async fn get_flag_id(
         &self,
         flag: i64

@@ -620,7 +620,7 @@ where
     }
 
     async fn get_tags(&self) -> Result<Tags, GetTagsError> {
-        Ok(Tags { tags: self.db.get_tags().await? })
+        Ok(Tags { tags: self.db.get_tags_active().await? })
     }
 
     async fn get_flag_id(
