@@ -41,7 +41,7 @@
   height: 1.75em;
   border: 2px solid black;
   border-radius: 50%;
-  z-index: 10;
+  z-index: 1;
   background-color: white;
 }
 
