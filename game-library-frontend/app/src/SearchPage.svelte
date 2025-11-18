@@ -178,8 +178,9 @@
     </div>
     <div class="row">
       <div class="col mb-3">
-        <label for="publisher_input" class="form-label">Publisher</label>
-        <PublisherInput {client} {publisher} bind:item={publisher_select} bind:cache={publishers_cache} />
+        <!-- svelte-ignore a11y_label_has_associated_control -->
+        <label class="form-label">Publisher</label>
+        <PublisherInput {client} {publisher} bind:item={publisher_select} bind:cache={publishers_cache} allowNew={false} />
       </div>
       <div class="col mb-3">
         <label for="year_input" class="form-label">Year</label>

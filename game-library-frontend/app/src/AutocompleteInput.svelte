@@ -5,6 +5,7 @@
     fetcher,
     itemToText,
     value = $bindable(),
+    allowNew
   } = $props();
 
 </script>
@@ -43,6 +44,7 @@
     getOptionLabel={itemToText}
     search={(k) => fetcher.searchItems(k)}
     bind:value
+    combobox={allowNew}
     showMenuWithNoInput={false}
     style="width: 100%;"
     textfield$style="width: 100%;"

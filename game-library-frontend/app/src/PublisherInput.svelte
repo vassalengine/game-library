@@ -7,7 +7,8 @@
     client,
     publisher,
     item = $bindable(),
-    cache = $bindable()
+    cache = $bindable(),
+    allowNew
   } = $props();
 
   item = publisher ? textToPublisher(publisher) : null;
@@ -45,5 +46,4 @@
   );
 </script>
 
-<AutocompleteInput {fetcher} {itemToText} bind:value={item} />
-
+<AutocompleteInput {fetcher} {itemToText} bind:value={item} {allowNew} />
