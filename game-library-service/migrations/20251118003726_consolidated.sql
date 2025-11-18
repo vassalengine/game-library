@@ -319,6 +319,12 @@ BEGIN
     AND tag_id = OLD.tag_id;
 END;
 
+CREATE TABLE IF NOT EXISTS publishers (
+  publisher_id INTEGER PRIMARY KEY NOT NULL CHECK(publisher_id >= 0),
+  name TEXT NOT NULL,
+  UNIQUE(name)
+);
+
 CREATE TABLE IF NOT EXISTS projects_history (
   project_id INTEGER PRIMARY KEY NOT NULL CHECK(project_id >= 0),
   created_at INTEGER NOT NULL
@@ -332,7 +338,7 @@ CREATE TABLE IF NOT EXISTS projects_data (
   description TEXT NOT NULL,
   game_title TEXT NOT NULL,
   game_title_sort TEXT NOT NULL,
-  game_publisher TEXT NOT NULL,
+  game_publisher_id INTEGER NOT NULL,
   game_year TEXT NOT NULL,
   game_players_min INTEGER CHECK(game_players_min >= 1 OR game_players_min IS NULL),
   game_players_max INTEGER CHECK(game_players_max >= 1 OR game_players_max IS NULL),
@@ -343,7 +349,8 @@ CREATE TABLE IF NOT EXISTS projects_data (
   CHECK(game_players_max >= game_players_min OR game_players_min IS NULL OR game_players_max IS NULL),
   CHECK(game_length_max >= game_length_min OR game_length_min IS NULL OR game_length_max IS NULL),
   FOREIGN KEY(project_id) REFERENCES projects_history(project_id),
-  FOREIGN KEY(project_id, image) REFERENCES images(project_id, filename)
+  FOREIGN KEY(project_id, image) REFERENCES images(project_id, filename),
+  FOREIGN KEY(game_publisher_id) REFERENCES publishers(publisher_id)
 );
 
 CREATE TABLE IF NOT EXISTS projects_revisions (
@@ -370,6 +377,7 @@ CREATE TABLE IF NOT EXISTS projects (
   description TEXT NOT NULL,
   game_title TEXT NOT NULL,
   game_title_sort TEXT NOT NULL,
+  game_publisher_id INTEGER NOT NULL,
   game_publisher TEXT NOT NULL,
   game_year TEXT NOT NULL,
   game_players_min INTEGER CHECK(game_players_min >= 1 OR game_players_min IS NULL),
@@ -386,7 +394,9 @@ CREATE TABLE IF NOT EXISTS projects (
   FOREIGN KEY(project_id) REFERENCES projects_history(project_id),
   FOREIGN KEY(project_id, image) REFERENCES images(project_id, filename),
   FOREIGN KEY(modified_by) REFERENCES users(user_id),
-  FOREIGN KEY(project_id, revision) REFERENCES projects_revisions(project_id, revision)
+  FOREIGN KEY(project_id, revision) REFERENCES projects_revisions(project_id, revision),
+  FOREIGN KEY(game_publisher_id) REFERENCES publishers(publisher_id),
+  FOREIGN KEY(game_publisher) REFERENCES publishers(name)
 );
 
 CREATE TABLE IF NOT EXISTS flags (
