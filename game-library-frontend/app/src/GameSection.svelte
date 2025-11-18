@@ -275,7 +275,7 @@
           <div>
             <svg class="svg-icon"><use xlink:href="#industry"></use></svg>
             {#if proj.game.publisher}
-            <a href=".">{proj.game.publisher}</a>{#if proj.game.publisher}, {/if}
+            <a href=".">{proj.game.publisher}</a>{#if proj.game.year}, {/if}
             {/if}
             {#if proj.game.year}
             <a href=".">{proj.game.year}</a>
