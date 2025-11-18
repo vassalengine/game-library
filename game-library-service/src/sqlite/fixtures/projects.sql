@@ -24,7 +24,12 @@ VALUES
   (
     2,
     "XYZ"
-  );
+  ),
+  (
+    3,
+    "ABC"
+  )
+  ;
 
 INSERT INTO projects_data (
   project_data_id,

@@ -616,7 +616,7 @@ where
     }
 
     async fn get_publishers(&self) -> Result<Publishers, GetPublishersError> {
-        Ok(Publishers { publishers: self.db.get_publishers().await? })
+        Ok(Publishers { publishers: self.db.get_publishers_active().await? })
     }
 
     async fn get_tags(&self) -> Result<Tags, GetTagsError> {

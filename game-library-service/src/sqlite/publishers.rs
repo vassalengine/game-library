@@ -17,6 +17,26 @@ where
     Ok(
         sqlx::query_scalar!(
             "
+SELECT name
+FROM publishers
+ORDER BY name COLLATE NOCASE
+            "
+        )
+        .fetch_all(ex)
+        .await?
+    )
+}
+
+pub async fn get_publishers_active<'e, E>(
+    ex: E
+) -> Result<Vec<String>, DatabaseError>
+where
+    E: Executor<'e, Database = Sqlite>
+{
+    // return publishers in use now
+    Ok(
+        sqlx::query_scalar!(
+            "
 SELECT DISTINCT publishers.name
 FROM publishers
 JOIN projects
@@ -113,6 +133,14 @@ mod test {
     async fn get_publishers_ok(pool: Pool) {
         assert_eq!(
             get_publishers(&pool).await.unwrap(),
+            ["ABC".into(), "Test Game Company".to_string(), "XYZ".into()]
+        );
+    }
+
+    #[sqlx::test(fixtures("users", "projects"))]
+    async fn get_publishers_active_ok(pool: Pool) {
+        assert_eq!(
+            get_publishers_active(&pool).await.unwrap(),
             ["Test Game Company".to_string(), "XYZ".into()]
         );
     }
@@ -137,7 +165,7 @@ mod test {
     async fn create_publisher_already_exists(pool: Pool) {
         assert_eq!(
             get_publishers(&pool).await.unwrap(),
-            ["Test Game Company".to_string(), "XYZ".into()]
+            ["ABC".to_string(), "Test Game Company".into(), "XYZ".into()]
         );
 
         assert_eq!(
@@ -150,13 +178,27 @@ mod test {
     async fn get_or_create_publisher_get(pool: Pool) {
         assert_eq!(
             get_publishers(&pool).await.unwrap(),
-            ["Test Game Company".to_string(), "XYZ".into()]
+            ["ABC".to_string(), "Test Game Company".into(), "XYZ".into()]
         );
 
         let mut tx = pool.begin().await.unwrap();
         assert_eq!(
             get_or_create_publisher(&mut tx, "XYZ").await.unwrap(),
             Publisher(2)
+        );
+    }
+
+    #[sqlx::test(fixtures("users", "projects"))]
+    async fn get_or_create_publisher_create(pool: Pool) {
+        assert_eq!(
+            get_publishers(&pool).await.unwrap(),
+            ["ABC".to_string(), "Test Game Company".into(), "XYZ".into()]
+        );
+
+        let mut tx = pool.begin().await.unwrap();
+        assert_eq!(
+            get_or_create_publisher(&mut tx, "DEF").await.unwrap(),
+            Publisher(4)
         );
     }
 }

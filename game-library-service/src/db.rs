@@ -461,6 +461,10 @@ pub trait DatabaseClient {
         &self
     ) -> impl Future<Output = Result<Vec<String>, DatabaseError>> + Send;
 
+    fn get_publishers_active(
+        &self
+    ) -> impl Future<Output = Result<Vec<String>, DatabaseError>> + Send;
+
     fn get_tags(
         &self
     ) -> impl Future<Output = Result<Vec<String>, DatabaseError>> + Send;

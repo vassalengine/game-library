@@ -539,6 +539,13 @@ impl DatabaseClient for SqlxDatabaseClient<Sqlite> {
         publishers::get_publishers(&self.0).await
     }
 
+    async fn get_publishers_active(
+        &self
+    ) -> Result<Vec<String>, DatabaseError>
+    {
+        publishers::get_publishers_active(&self.0).await
+    }
+
     async fn get_tags(
         &self
     ) -> Result<Vec<String>, DatabaseError>
