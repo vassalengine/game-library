@@ -8,6 +8,7 @@
     proj = $bindable(),
     client,
     username,
+    base_url,
     editing = $bindable()
   } = $props();
 
@@ -62,6 +63,12 @@
     else {
       return 'unknown';
     }
+  }
+
+  function queryURL(base_url, key, val) {
+    const req_url = new URL(`${base_url}/projects`);
+    req_url.searchParams.append(key, val);
+    return req_url;
   }
 
   //
@@ -275,10 +282,10 @@
           <div>
             <svg class="svg-icon"><use xlink:href="#industry"></use></svg>
             {#if proj.game.publisher}
-            <a href=".">{proj.game.publisher}</a>{#if proj.game.year}, {/if}
+            <a href="{queryURL(base_url, 'publisher', proj.game.publisher)}">{proj.game.publisher}</a>{#if proj.game.year}, {/if}
             {/if}
             {#if proj.game.year}
-            <a href=".">{proj.game.year}</a>
+            <a href="{queryURL(base_url, 'year', proj.game.year)}">{proj.game.year}</a>
             {/if}
           </div>
           <div><svg class="svg-icon"><use xlink:href="#user-group"></use></svg> <a href=".">{players_slug}</a></div>
@@ -288,7 +295,7 @@
           <svg class="align-self-center svg-icon"><use xlink:href="#tags"></use></svg>
           <ul class="d-flex flex-wrap list-unstyled gap-3 mb-0">
             {#each proj.tags as tag}
-            <li><a href=".">{tag.replace(':', ': ')}</a></li>
+            <li><a href="{queryURL(base_url, 'tag', tag)}">{tag.replace(':', ': ')}</a></li>
             {/each}
           </ul>
         </div>

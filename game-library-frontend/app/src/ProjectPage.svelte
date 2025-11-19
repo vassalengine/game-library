@@ -114,7 +114,7 @@
   <ErrorBox error={proj_error} />
   {/if}
   {#if proj}
-  <GameSection bind:proj={proj} {client} username={user_info?.username} bind:editing={editing} />
+  <GameSection bind:proj={proj} {client} username={user_info?.username} {base_url} bind:editing={editing} />
   <ProjectSection bind:proj={proj} {client} username={user_info?.username} {ums_url} bind:editing={editing} />
   <PackagesSection bind:proj={proj} {client} username={user_info?.username} {ums_url} bind:editing={editing} />
   <ReadmeSection bind:proj={proj} {client} username={user_info?.username} bind:editing={editing} />
