@@ -56,5 +56,15 @@ jobs:
           cd game-library-frontend/app
           npm run test
 
+      - name: Set up projects database
+        run: |
+          cd game-library-service
+          DATABASE_URL=sqlite://projects.db sqlx database setup
+
+      - name: Set up users database
+        run: |
+          cd user-management-service
+          DATABASE_URL=sqlite://users.db sqlx database setup
+
       - name: Run tests
         run: cargo test
