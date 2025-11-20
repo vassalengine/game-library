@@ -1,0 +1,54 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Update container
+        run: sudo apt update
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        id: cache-cargo
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache npm
+        uses: actions/cache@v4
+        id: cache-npm
+        with:
+          path: ~/.npm
+        key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+  
+      - name: Install JavaScript dependencies
+        run: |
+          cd game-library-frontend/app
+          npm install
+      
+      - name: Build GLF app
+        run: | 
+          cd game-library-frontend/app
+          npm run build
+
+      - name: Test GLF app
+          cd game-library-frontend/app
+          npm run test 
+
+      - name: Run tests
+        run: cargo test
