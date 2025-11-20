@@ -37,12 +37,15 @@ jobs:
           path: ~/.npm
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
           restore-keys: ${{ runner.os }}-npm-
-  
+
+      - name: Install Rust nightly
+        run: rustup override set nightly
+
       - name: Install JavaScript dependencies
         run: |
           cd game-library-frontend/app
           npm install
-      
+
       - name: Build GLF app
         run: |
           cd game-library-frontend/app
@@ -51,7 +54,7 @@ jobs:
       - name: Test GLF app
         run: |
           cd game-library-frontend/app
-          npm run test 
+          npm run test
 
       - name: Run tests
         run: cargo test
