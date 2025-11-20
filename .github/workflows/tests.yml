@@ -44,11 +44,12 @@ jobs:
           npm install
       
       - name: Build GLF app
-        run: | 
+        run: |
           cd game-library-frontend/app
           npm run build
 
       - name: Test GLF app
+        run: |
           cd game-library-frontend/app
           npm run test 
 
