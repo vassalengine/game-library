@@ -41,6 +41,9 @@ jobs:
       - name: Install Rust nightly
         run: rustup override set nightly
 
+      - name: Install sqlx
+        run: cargo install sqlx-cli --no-default-features --features sqlite
+
       - name: Install JavaScript dependencies
         run: |
           cd game-library-frontend/app
