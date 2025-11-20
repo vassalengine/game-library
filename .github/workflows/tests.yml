@@ -35,8 +35,8 @@ jobs:
         id: cache-npm
         with:
           path: ~/.npm
-        key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: ${{ runner.os }}-npm-
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-npm-
   
       - name: Install JavaScript dependencies
         run: |
