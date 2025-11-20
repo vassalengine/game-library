@@ -12,7 +12,7 @@ edition = "2024"
 async-tempfile = "0.7"
 async-trait = "0.1"
 axum = { version = "0.8", features = ["http1", "http2", "json", "macros", "multipart", "query", "tokio"] }
-axum-extra = { version = "0.10", features = ["query", "typed-header"] }
+axum-extra = { version = "0.12", features = ["query", "typed-header"] }
 chrono = "0.4"
 const_format = "0.2.34"
 futures = "0.3"
