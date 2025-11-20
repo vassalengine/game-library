@@ -19,16 +19,12 @@ jobs:
       - name: Update container
         run: sudo apt update
 
+      - name: Install Rust nightly
+        run: rustup override set nightly
+
       - name: Cache cargo
-        uses: actions/cache@v4
+        uses:  Swatinem/rust-cache@v2
         id: cache-cargo
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-
 
       - name: Cache npm
         uses: actions/cache@v4
@@ -37,9 +33,6 @@ jobs:
           path: ~/.npm
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
           restore-keys: ${{ runner.os }}-npm-
-
-      - name: Install Rust nightly
-        run: rustup override set nightly
 
       - name: Install sqlx
         run: cargo install sqlx-cli --no-default-features --features sqlite
