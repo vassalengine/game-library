@@ -66,7 +66,7 @@
   }
 
   function queryURL(base_url, key, val) {
-    const req_url = new URL(`${base_url}/projects`);
+    const req_url = new URL(`${base_url}/search`);
     req_url.searchParams.append(key, val);
     return req_url;
   }
