@@ -6,7 +6,7 @@ cat << EOF | sqlite3 projects.db
 PRAGMA foreign_keys = ON;
 BEGIN TRANSACTION;
 DELETE FROM flags WHERE project_id = $proj_id;
-DELETE FROM tags WHERE project_id = $proj_id;
+DELETE FROM projects_tags WHERE project_id = $proj_id;
 DELETE FROM image_revisions WHERE project_id = $proj_id;
 DELETE FROM galleries WHERE project_id = $proj_id;
 DELETE FROM players WHERE project_id = $proj_id;
