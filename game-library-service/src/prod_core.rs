@@ -1473,7 +1473,7 @@ fn check_versions(
 mod test {
     use super::*;
 
-    use once_cell::sync::Lazy;
+    use std::sync::LazyLock;
     use tokio::io::AsyncRead;
 
     use crate::{
@@ -1484,7 +1484,7 @@ mod test {
 
     const NOW: &str = "2023-11-12T15:50:06.419538067Z";
 
-    static NOW_DT: Lazy<DateTime<Utc>> = Lazy::new(||
+    static NOW_DT: LazyLock<DateTime<Utc>> = LazyLock::new(||
         DateTime::parse_from_rfc3339(NOW)
             .unwrap()
             .with_timezone(&Utc)

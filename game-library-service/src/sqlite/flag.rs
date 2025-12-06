@@ -179,8 +179,7 @@ WHERE flag_id = ?
 mod test {
     use super::*;
 
-    use once_cell::sync::Lazy;
-    use std::slice;
+    use std::{slice, sync::LazyLock};
 
     type Pool = sqlx::Pool<Sqlite>;
 
@@ -275,7 +274,7 @@ mod test {
         );
     }
 
-    static FLAG_ONE: Lazy<FlagRow> = Lazy::new(||
+    static FLAG_ONE: LazyLock<FlagRow> = LazyLock::new(||
         FlagRow {
             flag_id: 1,
             project: "test_game".into(),

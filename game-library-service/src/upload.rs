@@ -1,7 +1,6 @@
 use axum::body::Bytes;
 use http::header::{HeaderMap, HeaderName, HeaderValue};
 use futures::Stream;
-use once_cell::sync::Lazy;
 use regex::Regex;
 use s3::{
     bucket::Bucket,
@@ -18,7 +17,8 @@ use sha2::{
 };
 use std::{
     future::Future,
-    io
+    io,
+    sync::LazyLock
 };
 use thiserror::Error;
 use tokio::io::{
@@ -49,13 +49,13 @@ pub struct InvalidFilename;
 
 pub fn safe_filename(path: &str) -> Result<&str, InvalidFilename> {
     // characters to reject
-    static BAD_CHAR: Lazy<Regex> = Lazy::new(||
+    static BAD_CHAR: LazyLock<Regex> = LazyLock::new(||
         Regex::new(r#"[\x00-\x1F\x7F-\x9F/?<>\\/:*|"']"#)
             .expect("bad regex")
     );
 
     // reserved names on Windows
-    static WIN_RESERVED: Lazy<Regex> = Lazy::new(||
+    static WIN_RESERVED: LazyLock<Regex> = LazyLock::new(||
         Regex::new(r#"^(?i:CON|PRN|AUX|NUL|(COM|LPT)[1-9])($|\.)"#)
             .expect("bad regex")
     );

@@ -409,7 +409,7 @@ mod test {
         pagination::{Anchor, Direction, Limit, SortBy, Pagination, Seek, SeekLink}
     };
     use mime::{APPLICATION_JSON, IMAGE_PNG, TEXT_PLAIN, Mime};
-    use once_cell::sync::Lazy;
+    use std::sync::LazyLock;
     use tokio_util::io::StreamReader;
     use tower::ServiceExt; // for oneshot
 
@@ -436,7 +436,7 @@ mod test {
         body_bytes(r).await.is_empty()
     }
 
-    static PROJECT_SUMMARY_A: Lazy<ProjectSummary> = Lazy::new(||
+    static PROJECT_SUMMARY_A: LazyLock<ProjectSummary> = LazyLock::new(||
         ProjectSummary {
             name: "project_a".into(),
             slug: "project_a".into(),
@@ -456,7 +456,7 @@ mod test {
         }
     );
 
-    static PROJECT_SUMMARY_B: Lazy<ProjectSummary> = Lazy::new(||
+    static PROJECT_SUMMARY_B: LazyLock<ProjectSummary> = LazyLock::new(||
         ProjectSummary {
             name: "project_b".into(),
             slug: "project_b".into(),
@@ -478,7 +478,7 @@ mod test {
 
     const BOB_UID: i64 = 1;
 
-    static EIA_PROJECT_DATA: Lazy<ProjectData> = Lazy::new(||
+    static EIA_PROJECT_DATA: LazyLock<ProjectData> = LazyLock::new(||
         ProjectData {
             name: "eia".into(),
             slug: "eia".into(),

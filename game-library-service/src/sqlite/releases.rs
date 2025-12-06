@@ -525,14 +525,13 @@ where
 mod test {
     use super::*;
 
-    use once_cell::sync::Lazy;
-    use std::slice;
+    use std::{slice, sync::LazyLock};
 
     use crate::sqlite::project::get_project_row;
 
     type Pool = sqlx::Pool<Sqlite>;
 
-    static RR_1_2_3: Lazy<ReleaseRow> = Lazy::new(||
+    static RR_1_2_3: LazyLock<ReleaseRow> = LazyLock::new(||
         ReleaseRow {
             release_id: 1,
             version: "1.2.3".into(),
@@ -559,7 +558,7 @@ mod test {
         }
 */
 
-    static RR_1_2_4: Lazy<ReleaseRow> = Lazy::new(||
+    static RR_1_2_4: LazyLock<ReleaseRow> = LazyLock::new(||
         ReleaseRow {
             release_id: 2,
             version: "1.2.4".into(),
@@ -573,7 +572,7 @@ mod test {
         }
     );
 
-    static RR_1_2_5: Lazy<ReleaseRow> = Lazy::new(||
+    static RR_1_2_5: LazyLock<ReleaseRow> = LazyLock::new(||
         ReleaseRow {
             release_id: 4,
             version: "1.2.5".into(),

@@ -1,16 +1,16 @@
 use mime::Mime;
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 use thiserror::Error;
 
-static IMAGE_AVIF: Lazy<Mime> = Lazy::new(||
+static IMAGE_AVIF: LazyLock<Mime> = LazyLock::new(||
     "image/avif".parse().expect("bad MIME type")
 );
 
-static IMAGE_WEBP: Lazy<Mime> = Lazy::new(||
+static IMAGE_WEBP: LazyLock<Mime> = LazyLock::new(||
     "image/webp".parse().expect("bad MIME type")
 );
 
-static APPLICATION_ZIP: Lazy<Mime> = Lazy::new(||
+static APPLICATION_ZIP: LazyLock<Mime> = LazyLock::new(||
     "application/zip".parse().expect("bad MIME type")
 );
 

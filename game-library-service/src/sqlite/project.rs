@@ -671,7 +671,7 @@ pub async fn update_project_non_project_data(
 mod test {
     use super::*;
 
-    use once_cell::sync::Lazy;
+    use std::sync::LazyLock;
 
     use crate::{
         input::{GameDataPost, RangePost},
@@ -706,7 +706,7 @@ mod test {
         assert_eq!(normalize_project_name("fÖÖ bar"), "foo bar");
     }
 
-    static CREATE_ROW: Lazy<ProjectRow> = Lazy::new(||
+    static CREATE_ROW: LazyLock<ProjectRow> = LazyLock::new(||
         ProjectRow {
             project_id: 1,
             name: "test_game".into(),
@@ -730,7 +730,7 @@ mod test {
         }
     );
 
-    static CREATE_DATA: Lazy<ProjectDataPost> = Lazy::new(||
+    static CREATE_DATA: LazyLock<ProjectDataPost> = LazyLock::new(||
         ProjectDataPost {
             name: CREATE_ROW.name.clone(),
             description: CREATE_ROW.description.clone(),
@@ -1010,7 +1010,7 @@ mod test {
         );
     }
 
-    static CUR_ROW: Lazy<ProjectRow> = Lazy::new(||
+    static CUR_ROW: LazyLock<ProjectRow> = LazyLock::new(||
         ProjectRow {
             project_id: 42,
             name: "test_game".into(),
@@ -1034,7 +1034,7 @@ mod test {
         }
     );
 
-    static OLD_ROW: Lazy<ProjectRow> = Lazy::new(||
+    static OLD_ROW: LazyLock<ProjectRow> = LazyLock::new(||
         ProjectRow {
             project_id: 42,
             name: "test_game".into(),

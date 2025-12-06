@@ -1,5 +1,5 @@
 use glc::model::FlagTag;
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 use regex::Regex;
 use serde::{Deserialize, Deserializer, Serialize};
 
@@ -112,11 +112,11 @@ impl MaybePackageDataPatch {
 }
 
 pub fn slug_for(s: &str) -> String {
-    static HYPHENS: Lazy<Regex> = Lazy::new(||
+    static HYPHENS: LazyLock<Regex> = LazyLock::new(||
         Regex::new("-+").expect("bad regex")
     );
 
-    static SPECIAL: Lazy<Regex> = Lazy::new(||
+    static SPECIAL: LazyLock<Regex> = LazyLock::new(||
         Regex::new(r#"[:/?#\[\]@!$&'()*+,;=%"<>\\^`{}|]"#).expect("bad regex")
     );
 
