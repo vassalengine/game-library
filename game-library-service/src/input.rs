@@ -1,7 +1,7 @@
 use glc::model::FlagTag;
-use std::sync::LazyLock;
 use regex::Regex;
 use serde::{Deserialize, Deserializer, Serialize};
+use std::sync::LazyLock;
 
 pub trait ConsecutiveWhitespace {
     fn has_consecutive_whitespace(&self) -> bool;
