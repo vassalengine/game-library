@@ -29,6 +29,7 @@ use tokio_util::io::{
     InspectReader,
     StreamReader
 };
+use tracing::info;
 
 #[derive(Debug, Error)]
 pub enum UploadError {
@@ -83,6 +84,8 @@ where
     S: Stream<Item = Result<Bytes, io::Error>> + Send,
     W: AsyncWrite
 {
+    info!("{}", line!());
+
     // make hashing reader
     let mut hasher = Sha256::new();
     let reader = InspectReader::new(
@@ -90,12 +93,16 @@ where
         |buf| hasher.update(buf)
     );
 
+    info!("{}", line!());
+
     // read stream
     futures::pin_mut!(reader);
     futures::pin_mut!(writer);
+    info!("{}", line!());
     let size = tokio::io::copy(&mut reader, &mut writer).await?;
     let sha256 = format!("{:x}", hasher.finalize());
 
+    info!("{}", line!());
     Ok((sha256, size))
 }
 
