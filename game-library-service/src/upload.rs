@@ -100,6 +100,7 @@ where
     futures::pin_mut!(writer);
     info!("{}", line!());
     let size = tokio::io::copy(&mut reader, &mut writer).await?;
+    info!("{}", line!());
     let sha256 = format!("{:x}", hasher.finalize());
 
     info!("{}", line!());
