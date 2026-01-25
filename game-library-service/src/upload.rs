@@ -86,11 +86,17 @@ where
 {
     info!("{}", line!());
 
+    let mut off = 0;
+
     // make hashing reader
     let mut hasher = Sha256::new();
     let reader = InspectReader::new(
         StreamReader::new(stream),
-        |buf| hasher.update(buf)
+        |buf| {
+            off += buf.len();
+            info!("{off}");
+            hasher.update(buf);
+        }
     );
 
     info!("{}", line!());
