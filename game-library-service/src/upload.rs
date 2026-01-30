@@ -27,6 +27,7 @@ use tokio::io::{
 };
 use tokio_util::io::{
     InspectReader,
+    InspectWriter,
     StreamReader
 };
 use tracing::info;
@@ -88,10 +89,24 @@ where
 
     let mut off = 0;
 
+/*
     // make hashing reader
     let mut hasher = Sha256::new();
     let reader = InspectReader::new(
         StreamReader::new(stream),
+        |buf| {
+            off += buf.len();
+            info!("{off}");
+            hasher.update(buf);
+        }
+    );
+*/
+    let reader = StreamReader::new(stream);
+
+    // make hashing writer
+    let mut hasher = Sha256::new();
+    let writer = InspectWriter::new(
+        writer,
         |buf| {
             off += buf.len();
             info!("{off}");
@@ -105,7 +120,8 @@ where
     futures::pin_mut!(reader);
     futures::pin_mut!(writer);
     info!("{}", line!());
-    let size = tokio::io::copy(&mut reader, &mut writer).await?;
+//    let size = tokio::io::copy(&mut reader, &mut writer).await?;
+    let size = tokio::io::copy_buf(&mut reader, &mut writer).await?;
     info!("{}", line!());
     let sha256 = format!("{:x}", hasher.finalize());
 
