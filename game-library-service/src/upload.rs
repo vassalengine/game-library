@@ -25,11 +25,7 @@ use tokio::io::{
     AsyncRead,
     AsyncWrite
 };
-use tokio_util::io::{
-    InspectReader,
-    InspectWriter,
-    StreamReader
-};
+use tokio_util::io::{InspectWriter, StreamReader};
 use tracing::info;
 
 #[derive(Debug, Error)]
@@ -85,22 +81,8 @@ where
     S: Stream<Item = Result<Bytes, io::Error>> + Send,
     W: AsyncWrite
 {
-    info!("{}", line!());
-
     let mut off = 0;
 
-/*
-    // make hashing reader
-    let mut hasher = Sha256::new();
-    let reader = InspectReader::new(
-        StreamReader::new(stream),
-        |buf| {
-            off += buf.len();
-            info!("{off}");
-            hasher.update(buf);
-        }
-    );
-*/
     let reader = StreamReader::new(stream);
 
     // make hashing writer
@@ -114,17 +96,12 @@ where
         }
     );
 
-    info!("{}", line!());
-
     // read stream
     futures::pin_mut!(reader);
     futures::pin_mut!(writer);
-    info!("{}", line!());
     let size = tokio::io::copy(&mut reader, &mut writer).await?;
-    info!("{}", line!());
     let sha256 = format!("{:x}", hasher.finalize());
 
-    info!("{}", line!());
     Ok((sha256, size))
 }
 
