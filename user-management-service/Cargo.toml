@@ -22,7 +22,7 @@ hmac = "0.12"
 itertools = "0.14"
 jsonwebtoken = { version = "10", default-features = false, features = ["aws_lc_rs"] }
 mime = "0.3"
-rand = "0.9"
+rand = "0.10"
 reqwest = { version = "0.13", features = ["cookies", "json"] }
 serde_json = "1"
 serde_urlencoded = "0.7"
