@@ -21,10 +21,7 @@ use std::{
     sync::LazyLock
 };
 use thiserror::Error;
-use tokio::io::{
-    AsyncRead,
-    AsyncWrite
-};
+use tokio::{AsyncRead, AsyncWrite, BufWriter};
 use tokio_util::io::{InspectWriter, StreamReader};
 use tracing::info;
 
@@ -88,7 +85,7 @@ where
     // make hashing writer
     let mut hasher = Sha256::new();
     let writer = InspectWriter::new(
-        writer,
+        BufWriter::new(writer),
         |buf| {
             off += buf.len();
             info!("{off}");
