@@ -21,7 +21,7 @@ use std::{
     sync::LazyLock
 };
 use thiserror::Error;
-use tokio::{AsyncRead, AsyncWrite, BufWriter};
+use tokio::io::{AsyncRead, AsyncWrite, BufWriter};
 use tokio_util::io::{InspectWriter, StreamReader};
 use tracing::info;
 
