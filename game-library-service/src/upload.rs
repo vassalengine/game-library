@@ -84,13 +84,15 @@ where
 
     // make hashing writer
     let mut hasher = Sha256::new();
-    let writer = InspectWriter::new(
-        BufWriter::new(writer),
-        |buf| {
-            off += buf.len();
-            info!("{off}");
-            hasher.update(buf);
-        }
+    let writer = BufWriter::new(
+        InspectWriter::new(
+            writer,
+            |buf| {
+                off += buf.len();
+                info!("{off}");
+                hasher.update(buf);
+            }
+        )
     );
 
     // read stream
