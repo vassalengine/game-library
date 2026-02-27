@@ -10,17 +10,18 @@ use glc::{
     pagination::{Anchor, Direction, Facet, Limit, SortBy, Pagination, Seek, SeekLink}
 };
 use mime::Mime;
+use sha2::{Digest, Sha256};
 use std::{
+    fs::File,
     future::Future,
-    io,
+    io::{self, Write},
     path::PathBuf
 };
-use tokio::io::{
-    AsyncRead,
-    AsyncReadExt,
-    AsyncSeek,
-    AsyncSeekExt
+use tokio::{
+    io::{AsyncRead, AsyncReadExt, AsyncSeek, AsyncSeekExt, AsyncWriteExt},
+    runtime::Handle
 };
+use tokio_util::io::StreamReader;
 use tracing::info;
 use unicode_ccc::{CanonicalCombiningClass, get_canonical_combining_class};
 use unicode_normalization::UnicodeNormalization;
@@ -374,8 +375,42 @@ where
 
         let stream = Box::into_pin(stream);
 
+/*
         let (sha256, size) = stream_to_writer(stream, &mut file)
             .await?;
+*/
+
+        let mut reader = StreamReader::new(stream);
+        let handle = Handle::current();
+
+        let tmp_path = file.file_path().clone();
+
+        let (sha256, size) = tokio::task::spawn_blocking(move || {
+            let mut hasher = Sha256::new();
+            let mut buf = vec![0; 4096];
+            let mut size = 0u64;
+
+            let mut file = File::create(tmp_path)?;
+
+            loop {
+                match handle.block_on((&mut reader).read(&mut buf)) {
+                    Ok(0) => {
+                        let sha256 = format!("{:x}", hasher.finalize());
+                        break Ok((sha256, size))
+                    },
+                    Ok(r) => {
+                        hasher.update(&buf[..r]);
+                        file.write_all(&buf[..r])?;
+                        size += r as u64;
+                    },
+                    Err(e) => return Err(e)
+                }
+            }
+        })
+        .await
+        .map_err(std::io::Error::other)??;
+
+
 
         info!("wrote temp file {}", file.file_path().display());
 
