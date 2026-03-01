@@ -276,7 +276,7 @@ where
     S: Stream<Item = Result<Bytes, io::Error>> + Unpin
 {
     // ensure the filename is valid
-    let filename = safe_filename(&filename)
+    let filename = safe_filename(filename)
         .or(Err(AppError::MalformedQuery))?;
 
     let mut file = TempFile::new_in(upload_dir)

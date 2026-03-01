@@ -445,7 +445,7 @@ where
             release,
             filename,
             size as i64,
-            &sha256,
+            sha256,
             content_type.as_ref(),
             requires.as_deref(),
             &url,

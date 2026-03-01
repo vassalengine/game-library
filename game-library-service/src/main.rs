@@ -15,7 +15,7 @@ use std::{
     fs,
     io,
     net::IpAddr,
-    path::{Path, PathBuf},
+    path::PathBuf,
     sync::Arc,
     time::Duration
 };
