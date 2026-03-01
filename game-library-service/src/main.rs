@@ -261,7 +261,10 @@ fn routes(
                 post(handlers::admin_user_event_post)
             }
         )
-        .layer(TimeoutLayer::new(Duration::from_secs(10)))
+        .layer(TimeoutLayer::with_status_code(
+            StatusCode::REQUEST_TIMEOUT,
+            Duration::from_secs(10)
+        ))
         .route(
             "/projects/{proj}/packages/{pkg_name}/{version}/{file}",
             if read_only {
@@ -269,7 +272,8 @@ fn routes(
             }
             else {
                 post(handlers::file_post)
-                    .layer(TimeoutLayer::new(
+                    .layer(TimeoutLayer::with_status_code(
+                        StatusCode::REQUEST_TIMEOUT,
                         Duration::from_secs(upload_timeout))
                     )
             }
