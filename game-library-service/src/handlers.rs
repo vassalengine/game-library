@@ -226,15 +226,18 @@ fn into_limited_stream(
 fn limit_content_length(
     content_length: Option<u64>,
     max_size: usize
-) -> Result<(Option<u64>, usize), AppError>
+) -> Result<usize, AppError>
 {
-    content_length
-        .map_or(
-            Some((None, max_size)),
-            |cl| cl.try_into().map(|cl| (Some(cl as u64), cl)).ok()
-        )
-        .filter(|(_, lim)| *lim <= max_size)
-        .ok_or(AppError::TooLarge)
+    if let Some(content_length) = content_length {
+        match usize::try_from(content_length) {
+            Err(_) => Err(AppError::TooLarge),
+            Ok(cl) if cl > max_size => Err(AppError::TooLarge),
+            Ok(cl) => Ok(cl)
+        }
+    }
+    else {
+        Ok(max_size)
+    }
 }
 
 async fn write_file<F>(
@@ -344,7 +347,7 @@ pub async fn file_post(
     request: Request
 ) -> Result<(), AppError>
 {
-    let (content_length, limit) = limit_content_length(
+    let limit = limit_content_length(
         content_length.map(|cl| cl.0.0),
         core.max_file_size()
     )?;
@@ -381,7 +384,7 @@ pub async fn gallery_post(
     request: Request
 ) -> Result<(), AppError>
 {
-    let (content_length, limit) = limit_content_length(
+    let limit = limit_content_length(
         content_length.map(|cl| cl.0.0),
         core.max_file_size()
     )?;
@@ -452,7 +455,7 @@ pub async fn image_post(
     request: Request
 ) -> Result<(), AppError>
 {
-    let (content_length, limit) = limit_content_length(
+    let limit = limit_content_length(
         content_length.map(|cl| cl.0.0),
         core.max_file_size()
     )?;
@@ -541,7 +544,7 @@ mod test {
         let len = 20;
         assert_eq!(
             limit_content_length(Some(len as u64), len + 1).unwrap(),
-            (Some(len as u64), len)
+            len
         );
     }
 
@@ -550,7 +553,7 @@ mod test {
         let len = 20;
         assert_eq!(
             limit_content_length(Some(len as u64), len).unwrap(),
-            (Some(len as u64), len)
+            len
         );
     }
 
@@ -577,7 +580,7 @@ mod test {
         let len = 20;
         assert_eq!(
             limit_content_length(None, len).unwrap(),
-            (None, len)
+            len
         );
     }
 }
