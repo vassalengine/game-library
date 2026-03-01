@@ -267,6 +267,41 @@ where
     Ok((sha256, size))
 }
 
+/*
+pub async fn stream_to_writer<S, W>(
+    stream: S,
+    mut writer: W
+) -> Result<(String, u64), io::Error>
+where
+    S: Stream<Item = Result<Bytes, io::Error>> + Send + Unpin + 'static,
+    W: AsyncWrite + Send + Unpin + 'static
+{
+    let mut reader = StreamReader::new(stream);
+    let handle = Handle::current();
+
+    tokio::task::spawn_blocking(move || {
+        let mut hasher = Sha256::new();
+        let mut buf = vec![0; 4096];
+        let mut size = 0u64;
+
+        loop {
+            match handle.block_on((&mut reader).read(&mut buf)) {
+                Ok(0) => {
+                    let sha256 = format!("{:x}", hasher.finalize());
+                    break Ok((sha256, size))
+                },
+                Ok(r) => {
+                    hasher.update(&buf[..r]);
+                    writer.write(&buf[..r]);
+                    size += r as u64;
+                },
+                Err(e) => break Err(e)
+            }
+        }
+    }).await?
+}
+*/
+
 async fn stream_to_temp_file<S>(
     filename: &str,
     upload_dir: &std::path::Path,
