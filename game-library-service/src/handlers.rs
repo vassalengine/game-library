@@ -31,7 +31,7 @@ use tokio_util::io::{InspectWriter, StreamReader};
 use tracing::info;
 
 use crate::{
-    core::{AddFileError, CoreArc},
+    core::CoreArc,
     errors::AppError,
     extractors::{DiscourseEvent, ProjectPackage, ProjectPackageRelease, Wrapper},
     input::{FlagPost, GalleryPatch, PackageDataPatch, PackageDataPost, ProjectDataPatch, ProjectDataPost},
@@ -209,7 +209,7 @@ fn unpack_limited_error(e: Box<dyn Error + Sync + Send>) -> io::Error {
     }
 }
 
-fn into_stream(
+fn into_limited_stream(
     request: Request,
     limit: usize
 ) -> Box<dyn Stream<Item = Result<Bytes, io::Error>> + Send + Unpin>
@@ -292,7 +292,7 @@ where
     Ok((sha256, size))
 }
 
-async fn stream_to_temp_file(
+async fn multipart_to_temp_file(
     filename: &str,
     upload_dir: &std::path::Path,
     mut multipart: Multipart
@@ -300,7 +300,7 @@ async fn stream_to_temp_file(
 {
     // ensure the filename is valid
     let filename = safe_filename(&filename)
-        .or(Err(AddFileError::InvalidFilename))?;
+        .or(Err(AppError::MalformedQuery))?;
 
     let Some(field) = multipart.next_field().await? else {
         return Err(AppError::MalformedUpload);
@@ -312,8 +312,7 @@ async fn stream_to_temp_file(
 
     let mut file = TempFile::new_in(upload_dir)
         .await
-        .map_err(io::Error::other)
-        .map_err(AddFileError::IOError)?;
+        .map_err(|e| AppError::InternalError(e.to_string()))?;
 
     let file_path = file.file_path().to_owned();
 
@@ -323,25 +322,65 @@ async fn stream_to_temp_file(
 
     let (sha256, size) = write_file(stream, &mut file)
         .await
-        .map_err(AddFileError::IOError)?;
+        .map_err(|e| AppError::InternalError(e.to_string()))?;
 
     info!("wrote temp file {}", file_path.display());
 
     Ok((file, size, sha256, content_type))
 }
 
+async fn stream_to_temp_file<S>(
+    filename: &str,
+    upload_dir: &std::path::Path,
+    stream: S
+) -> Result<(TempFile, u64, String), AppError>
+where
+    S: Stream<Item = Result<Bytes, io::Error>> + Unpin
+{
+    // ensure the filename is valid
+    let filename = safe_filename(&filename)
+        .or(Err(AppError::MalformedQuery))?;
+
+    let mut file = TempFile::new_in(upload_dir)
+        .await
+        .map_err(|e| AppError::InternalError(e.to_string()))?;
+
+    let file_path = file.file_path().to_owned();
+
+    info!("created temp file {}", file_path.display());
+
+    let (sha256, size) = write_file(stream, &mut file)
+        .await
+        .map_err(|e| match e.kind() {
+            io::ErrorKind::FileTooLarge => AppError::TooLarge,
+            _ => AppError::InternalError(e.to_string())
+        })?;
+
+    info!("wrote temp file {}", file_path.display());
+
+    Ok((file, size, sha256))
+}
+
+
 pub async fn file_post(
     Owned(owner, proj): Owned,
     ProjectPackageRelease(_, _, release): ProjectPackageRelease,
     Path((_, _, _, filename)): Path<(String, String, String, String)>,
+    content_type: Option<TypedHeader<ContentType>>,
+    content_length: Option<TypedHeader<ContentLength>>,
     State(core): State<CoreArc>,
-    multipart: Multipart
+    request: Request
 ) -> Result<(), AppError>
 {
-    let (mut file, size, sha256, content_type) = stream_to_temp_file(
+    let (content_length, limit) = limit_content_length(
+        content_length.map(|cl| cl.0.0),
+        core.max_file_size()
+    )?;
+
+    let (mut file, size, sha256) = stream_to_temp_file(
         &filename,
-        std::path::Path::new("upload"), // FIXME
-        multipart
+        core.upload_dir(),
+        into_limited_stream(request, limit)
     ).await?;
 
     let path = file.file_path().to_owned();
@@ -352,7 +391,7 @@ pub async fn file_post(
              proj,
              release,
              &filename,
-             content_type.as_ref(),
+             content_type.map(|h| h.0.into()).as_ref(),
              size,
              &sha256,
              &path,
@@ -364,14 +403,25 @@ pub async fn file_post(
 pub async fn gallery_post(
     Owned(owner, proj): Owned,
     Path((_, img_name)): Path<(String, String)>,
+    content_type: Option<TypedHeader<ContentType>>,
+    content_length: Option<TypedHeader<ContentLength>>,
     State(core): State<CoreArc>,
-    multipart: Multipart
+    request: Request
 ) -> Result<(), AppError>
 {
-    let (mut file, size, sha256, content_type) = stream_to_temp_file(
+    let (content_length, limit) = limit_content_length(
+        content_length.map(|cl| cl.0.0),
+        core.max_file_size()
+    )?;
+
+    // NB: No ContentType header will result in BAD_REQUEST by default, so
+    // have to make it optional and check manually
+    let content_type = content_type.ok_or(AppError::BadMimeType)?.0.into();
+
+    let (mut file, size, sha256) = stream_to_temp_file(
         &img_name,
-        std::path::Path::new("upload"), // FIXME
-        multipart
+        core.upload_dir(),
+        into_limited_stream(request, limit)
     ).await?;
 
     let path = file.file_path().to_owned();
@@ -381,7 +431,7 @@ pub async fn gallery_post(
             owner,
             proj,
             &img_name,
-            &content_type.ok_or(AppError::BadMimeType)?,
+            &content_type,
             size,
             &sha256,
             &path,
@@ -427,13 +477,22 @@ pub async fn image_post(
     content_type: Option<TypedHeader<ContentType>>,
     content_length: Option<TypedHeader<ContentLength>>,
     State(core): State<CoreArc>,
-    multipart: Multipart
+    request: Request
 ) -> Result<(), AppError>
 {
-    let (mut file, size, sha256, content_type) = stream_to_temp_file(
+    let (content_length, limit) = limit_content_length(
+        content_length.map(|cl| cl.0.0),
+        core.max_file_size()
+    )?;
+
+    // NB: No ContentType header will result in BAD_REQUEST by default, so
+    // have to make it optional and check manually
+    let content_type = content_type.ok_or(AppError::BadMimeType)?.0.into();
+
+    let (mut file, size, sha256) = stream_to_temp_file(
         &img_name,
-        std::path::Path::new("upload"), // FIXME
-        multipart
+        core.upload_dir(),
+        into_limited_stream(request, limit)
     ).await?;
 
     let path = file.file_path().to_owned();
@@ -443,7 +502,7 @@ pub async fn image_post(
             owner,
             proj,
             &img_name,
-            &content_type.ok_or(AppError::BadMimeType)?,
+            &content_type,
             size,
             &sha256,
             &path,

@@ -11,17 +11,16 @@ use s3::{
     },
     region::Region
 };
-use sha2::{
-    Digest,
-    Sha256
-};
 use std::{
     future::Future,
     io,
     sync::LazyLock
 };
 use thiserror::Error;
-use tokio::io::{AsyncRead, AsyncWrite, BufWriter};
+use tokio::{
+    io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt, BufWriter},
+    runtime::Handle
+};
 use tokio_util::io::{InspectWriter, StreamReader};
 use tracing::info;
 
@@ -70,39 +69,40 @@ pub fn safe_filename(path: &str) -> Result<&str, InvalidFilename> {
     }
 }
 
+/*
 pub async fn stream_to_writer<S, W>(
     stream: S,
-    writer: W
+    mut writer: W
 ) -> Result<(String, u64), io::Error>
 where
-    S: Stream<Item = Result<Bytes, io::Error>> + Send,
-    W: AsyncWrite
+    S: Stream<Item = Result<Bytes, io::Error>> + Send + Unpin + 'static,
+    W: AsyncWrite + Send + Unpin + 'static
 {
-    let mut off = 0;
+    let mut reader = StreamReader::new(stream);
+    let handle = Handle::current();
 
-    let reader = StreamReader::new(stream);
+    tokio::task::spawn_blocking(move || {
+        let mut hasher = Sha256::new();
+        let mut buf = vec![0; 4096];
+        let mut size = 0u64;
 
-    // make hashing writer
-    let mut hasher = Sha256::new();
-    let writer = BufWriter::new(
-        InspectWriter::new(
-            writer,
-            |buf| {
-                off += buf.len();
-                info!("{off}");
-                hasher.update(buf);
+        loop {
+            match handle.block_on((&mut reader).read(&mut buf)) {
+                Ok(0) => {
+                    let sha256 = format!("{:x}", hasher.finalize());
+                    break Ok((sha256, size))
+                },
+                Ok(r) => {
+                    hasher.update(&buf[..r]);
+                    writer.write(&buf[..r]);
+                    size += r as u64;
+                },
+                Err(e) => break Err(e)
             }
-        )
-    );
-
-    // read stream
-    futures::pin_mut!(reader);
-    futures::pin_mut!(writer);
-    let size = tokio::io::copy(&mut reader, &mut writer).await?;
-    let sha256 = format!("{:x}", hasher.finalize());
-
-    Ok((sha256, size))
+        }
+    }).await?
 }
+*/
 
 pub trait Uploader {
     fn upload<R>(

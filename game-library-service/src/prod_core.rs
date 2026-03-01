@@ -35,7 +35,7 @@ use crate::{
     module::{dump_moduledata, versions_in_moduledata},
     params::ProjectsParams,
     time::{self, nanos_to_rfc3339, rfc3339_to_nanos},
-    upload::{Uploader, safe_filename, stream_to_writer},
+    upload::{Uploader, safe_filename},
     version::Version
 };
 
@@ -55,6 +55,10 @@ where
     C: DatabaseClient + Send + Sync,
     U: Uploader + Send + Sync
 {
+    fn upload_dir(&self) -> &Path {
+        &self.upload_dir
+    }
+
     fn max_file_size(&self) -> usize {
         self.max_file_size
     }

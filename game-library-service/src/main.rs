@@ -2,7 +2,6 @@
 
 use axum::{
     Router,
-    extract::DefaultBodyLimit,
     http::StatusCode,
     response::{IntoResponse, Json, Response},
     routing::{get, patch, post, put}
@@ -218,7 +217,6 @@ fn routes(
             }
             else {
                 post(handlers::image_post)
-                    .layer(DefaultBodyLimit::max(max_image_size))
             }
             .get(handlers::image_get)
         )
@@ -273,11 +271,8 @@ fn routes(
             }
             else {
                 post(handlers::file_post)
-                    .layer(ServiceBuilder::new()
-                        .layer(TimeoutLayer::new(
-                            Duration::from_secs(upload_timeout))
-                        )
-                        .layer(DefaultBodyLimit::max(max_file_size))
+                    .layer(TimeoutLayer::new(
+                        Duration::from_secs(upload_timeout))
                     )
             }
         );
@@ -557,6 +552,8 @@ mod test {
 
     #[async_trait]
     impl Core for TestCore {
+        fn upload_dir(&self) -> &Path { Path::new("uploads") }
+
         fn max_file_size(&self) -> usize { MAX_FILE_SIZE }
 
         fn max_image_size(&self) -> usize { MAX_IMAGE_SIZE }
@@ -996,7 +993,7 @@ mod test {
     }
 
     async fn try_request(request: Request<Body>, rw: bool) -> Response {
-        routes(API_V1, !rw, false, 10, 1024, 1024)
+        routes(API_V1, !rw, false, 10, MAX_FILE_SIZE, MAX_IMAGE_SIZE)
             .with_state(test_state())
             .oneshot(request)
             .await

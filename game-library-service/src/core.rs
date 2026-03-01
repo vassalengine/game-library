@@ -359,6 +359,10 @@ pub enum UpdateUserError {
 
 #[async_trait]
 pub trait Core {
+    fn upload_dir(&self) -> &Path {
+        unimplemented!();
+    }
+
     fn max_file_size(&self) -> usize {
         unimplemented!();
     }
