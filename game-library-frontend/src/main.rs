@@ -104,7 +104,10 @@ fn routes(base_path: &str, log_headers: bool) -> Router<Arc<AppState>> {
             ServiceBuilder::new()
                 .layer(CompressionLayer::new())
                  // ensure requests don't block shutdown
-                .layer(TimeoutLayer::new(Duration::from_secs(10)))
+                .layer(TimeoutLayer::with_status_code(
+                    StatusCode::REQUEST_TIMEOUT,
+                    Duration::from_secs(10)
+                ))
         )
         .layer(
             TraceLayer::new_for_http()
