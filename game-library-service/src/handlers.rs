@@ -1,6 +1,11 @@
+use async_tempfile::TempFile;
 use axum::{
     body::Bytes,
-    extract::{Path, Request, State},
+    extract::{
+        Multipart, Path, Request, State,
+        multipart::{Field, MultipartError}
+    },
+    http::StatusCode,
     response::{Json, Redirect}
 };
 use axum_extra::{
@@ -14,18 +19,25 @@ use glc::{
     model::{Flags, ProjectData, Projects, Publishers, Tags, Users}
 };
 use http_body_util::{BodyExt, Limited, LengthLimitError};
+use mime::Mime;
+use sha2::{Digest, Sha256};
 use std::{
     error::Error,
-    io
+    io,
+    path::{self, PathBuf}
 };
+use tokio::io::{AsyncWrite, BufWriter};
+use tokio_util::io::{InspectWriter, StreamReader};
+use tracing::info;
 
 use crate::{
-    core::CoreArc,
+    core::{AddFileError, CoreArc},
     errors::AppError,
     extractors::{DiscourseEvent, ProjectPackage, ProjectPackageRelease, Wrapper},
     input::{FlagPost, GalleryPatch, PackageDataPatch, PackageDataPost, ProjectDataPatch, ProjectDataPost},
     model::{Admin, Flag, Owned, Project, User},
     params::ProjectsParams,
+    upload::safe_filename
 };
 
 pub async fn not_found() -> Result<(), AppError>
@@ -231,30 +243,120 @@ fn limit_content_length(
         .ok_or(AppError::TooLarge)
 }
 
+impl From<MultipartError> for AppError {
+    fn from(err: MultipartError) -> Self {
+        match err.status() {
+            StatusCode::PAYLOAD_TOO_LARGE => AppError::TooLarge,
+            StatusCode::BAD_REQUEST => AppError::MalformedUpload,
+            _ => AppError::InternalError(err.to_string())
+        }
+    }
+}
+
+fn wrap_multipart_error(err: MultipartError) -> io::Error {
+    // convert MultipartError from stream into io::Error
+    match err.status() {
+        StatusCode::PAYLOAD_TOO_LARGE => io::ErrorKind::FileTooLarge.into(),
+        StatusCode::BAD_REQUEST => io::ErrorKind::InvalidData.into(),
+        _ => io::Error::other(err)
+    }
+}
+
+async fn write_file<F>(
+    stream: impl Stream<Item = Result<Bytes, io::Error>>  + Unpin,
+    file: &mut F
+) ->  Result<(String, u64), io::Error>
+where
+    F: AsyncWrite + Unpin
+{
+    let mut off = 0;
+    let mut reader = StreamReader::new(stream);
+
+    // make hashing writer
+    let mut hasher = Sha256::new();
+    let mut writer = BufWriter::new(
+        InspectWriter::new(
+            file,
+            |buf| {
+                off += buf.len();
+                info!("{off}");
+                hasher.update(buf);
+            }
+        )
+    );
+
+    // read stream
+    let size = tokio::io::copy(&mut reader, &mut writer).await?;
+    let sha256 = format!("{:x}", hasher.finalize());
+
+    Ok((sha256, size))
+}
+
+async fn stream_to_temp_file(
+    filename: &str,
+    upload_dir: &std::path::Path,
+    mut multipart: Multipart
+) -> Result<(TempFile, u64, String, Option<Mime>), AppError>
+{
+    // ensure the filename is valid
+    let filename = safe_filename(&filename)
+        .or(Err(AddFileError::InvalidFilename))?;
+
+    let Some(field) = multipart.next_field().await? else {
+        return Err(AppError::MalformedUpload);
+    };
+
+    let content_type = field.content_type()
+        .map(|ct| ct.parse::<Mime>().or(Err(AppError::BadMimeType)))
+        .transpose()?;
+
+    let mut file = TempFile::new_in(upload_dir)
+        .await
+        .map_err(io::Error::other)
+        .map_err(AddFileError::IOError)?;
+
+    let file_path = file.file_path().to_owned();
+
+    info!("created temp file {}", file_path.display());
+
+    let stream = field.map_err(wrap_multipart_error);
+
+    let (sha256, size) = write_file(stream, &mut file)
+        .await
+        .map_err(AddFileError::IOError)?;
+
+    info!("wrote temp file {}", file_path.display());
+
+    Ok((file, size, sha256, content_type))
+}
+
 pub async fn file_post(
     Owned(owner, proj): Owned,
     ProjectPackageRelease(_, _, release): ProjectPackageRelease,
     Path((_, _, _, filename)): Path<(String, String, String, String)>,
-    content_type: Option<TypedHeader<ContentType>>,
-    content_length: Option<TypedHeader<ContentLength>>,
     State(core): State<CoreArc>,
-    request: Request
+    multipart: Multipart
 ) -> Result<(), AppError>
 {
-    let (content_length, limit) = limit_content_length(
-        content_length.map(|cl| cl.0.0),
-        core.max_file_size()
-    )?;
+    let (mut file, size, sha256, content_type) = stream_to_temp_file(
+        &filename,
+        std::path::Path::new("upload"), // FIXME
+        multipart
+    ).await?;
+
+    let path = file.file_path().to_owned();
 
     Ok(
         core.add_file(
-            owner,
-            proj,
-            release,
-            &filename,
-            content_type.map(|h| h.0.into()).as_ref(),
-            content_length,
-            into_stream(request, limit)
+             owner,
+             proj,
+             release,
+             &filename,
+             content_type.as_ref(),
+             size,
+             &sha256,
+             &path,
+             &mut file
         ).await?
     )
 }
@@ -262,28 +364,28 @@ pub async fn file_post(
 pub async fn gallery_post(
     Owned(owner, proj): Owned,
     Path((_, img_name)): Path<(String, String)>,
-    content_type: Option<TypedHeader<ContentType>>,
-    content_length: Option<TypedHeader<ContentLength>>,
     State(core): State<CoreArc>,
-    request: Request
+    multipart: Multipart
 ) -> Result<(), AppError>
 {
+    let (mut file, size, sha256, content_type) = stream_to_temp_file(
+        &img_name,
+        std::path::Path::new("upload"), // FIXME
+        multipart
+    ).await?;
 
-    let (content_length, limit) = limit_content_length(
-        content_length.map(|cl| cl.0.0),
-        core.max_file_size()
-    )?;
+    let path = file.file_path().to_owned();
 
-    // NB: No ContentType header will result in BAD_REQUEST by default, so
-    // have to make it optional and check manually
     Ok(
         core.add_gallery_image(
             owner,
             proj,
             &img_name,
-            &content_type.ok_or(AppError::BadMimeType)?.0.into(),
-            content_length,
-            into_stream(request, limit)
+            &content_type.ok_or(AppError::BadMimeType)?,
+            size,
+            &sha256,
+            &path,
+            &mut file
         ).await?
     )
 }
@@ -325,24 +427,27 @@ pub async fn image_post(
     content_type: Option<TypedHeader<ContentType>>,
     content_length: Option<TypedHeader<ContentLength>>,
     State(core): State<CoreArc>,
-    request: Request
+    multipart: Multipart
 ) -> Result<(), AppError>
 {
-    let (content_length, limit) = limit_content_length(
-        content_length.map(|cl| cl.0.0),
-        core.max_file_size()
-    )?;
+    let (mut file, size, sha256, content_type) = stream_to_temp_file(
+        &img_name,
+        std::path::Path::new("upload"), // FIXME
+        multipart
+    ).await?;
 
-    // NB: No ContentType header will result in BAD_REQUEST by default, so
-    // have to make it optional and check manually
+    let path = file.file_path().to_owned();
+
     Ok(
         core.add_image(
             owner,
             proj,
             &img_name,
-            &content_type.ok_or(AppError::BadMimeType)?.0.into(),
-            content_length,
-            into_stream(request, limit)
+            &content_type.ok_or(AppError::BadMimeType)?,
+            size,
+            &sha256,
+            &path,
+            &mut file
         ).await?
     )
 }

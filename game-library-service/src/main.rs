@@ -2,6 +2,7 @@
 
 use axum::{
     Router,
+    extract::DefaultBodyLimit,
     http::StatusCode,
     response::{IntoResponse, Json, Response},
     routing::{get, patch, post, put}
@@ -15,7 +16,7 @@ use std::{
     fs,
     io,
     net::IpAddr,
-    path::PathBuf,
+    path::{Path, PathBuf},
     sync::Arc,
     time::Duration
 };
@@ -117,7 +118,9 @@ fn routes(
     api: &str,
     read_only: bool,
     log_headers: bool,
-    upload_timeout: u64
+    upload_timeout: u64,
+    max_file_size: usize,
+    max_image_size: usize
 ) -> Router<AppState> {
     // set up our routes under api
     let api_router = Router::new()
@@ -215,6 +218,7 @@ fn routes(
             }
             else {
                 post(handlers::image_post)
+                    .layer(DefaultBodyLimit::max(max_image_size))
             }
             .get(handlers::image_get)
         )
@@ -269,8 +273,11 @@ fn routes(
             }
             else {
                 post(handlers::file_post)
-                    .layer(TimeoutLayer::new(
-                        Duration::from_secs(upload_timeout))
+                    .layer(ServiceBuilder::new()
+                        .layer(TimeoutLayer::new(
+                            Duration::from_secs(upload_timeout))
+                        )
+                        .layer(DefaultBodyLimit::max(max_file_size))
                     )
             }
         );
@@ -368,7 +375,9 @@ async fn run() -> Result<(), StartupError> {
         &config.api_base_path,
         config.read_only,
         config.log_headers,
-        config.upload_timeout
+        config.upload_timeout,
+        config.max_file_size,
+        config.max_image_size
     ).with_state(state);
 
     let ip: IpAddr = config.listen_ip.parse()?;
@@ -410,6 +419,7 @@ mod test {
     };
     use mime::{APPLICATION_JSON, IMAGE_PNG, TEXT_PLAIN, Mime};
     use std::sync::LazyLock;
+    use tokio::fs::File;
     use tokio_util::io::StreamReader;
     use tower::ServiceExt; // for oneshot
 
@@ -858,21 +868,17 @@ mod test {
             _proj: Project,
             _img_name: &str,
             content_type: &Mime,
-            _content_length: Option<u64>,
-            stream: Box<dyn Stream<Item = Result<Bytes, io::Error>> + Send + Unpin>
+            size: u64,
+            _sha256: &str,
+            _path: &Path,
+            mut _file: &mut File
         ) -> Result<(), AddImageError>
         {
             if content_type == &TEXT_PLAIN {
                 Err(AddImageError::BadMimeType)
             }
             else {
-                match exhaust_stream(stream).await {
-                    Ok(_) => Ok(()),
-                    Err(e) => match e.kind() {
-                        io::ErrorKind::FileTooLarge => Err(AddImageError::TooLarge),
-                        _ => Err(AddImageError::IOError(e))
-                    }
-                }
+                Ok(())
             }
         }
 
@@ -882,21 +888,17 @@ mod test {
             _proj: Project,
             _img_name: &str,
             content_type: &Mime,
-            _content_length: Option<u64>,
-            stream: Box<dyn Stream<Item = Result<Bytes, io::Error>> + Send + Unpin>
+            _size: u64,
+            _sha256: &str,
+            _path: &Path,
+            mut _file: &mut File
         ) -> Result<(), AddImageError>
         {
             if content_type == &TEXT_PLAIN {
                 Err(AddImageError::BadMimeType)
             }
             else {
-                match exhaust_stream(stream).await {
-                    Ok(_) => Ok(()),
-                    Err(e) => match e.kind() {
-                        io::ErrorKind::FileTooLarge => Err(AddImageError::TooLarge),
-                        _ => Err(AddImageError::IOError(e))
-                    }
-                }
+                Ok(())
             }
         }
 
@@ -917,17 +919,13 @@ mod test {
             _release: Release,
             _filename: &str,
             _content_type: Option<&Mime>,
-            _content_length: Option<u64>,
-            stream: Box<dyn Stream<Item = Result<Bytes, io::Error>> + Send + Unpin>
+            _size: u64,
+            _sha256: &str,
+            _path: &Path,
+            mut _file: &mut File
         ) -> Result<(), AddFileError>
         {
-            match exhaust_stream(stream).await {
-                Ok(_) => Ok(()),
-                Err(e) => match e.kind() {
-                    io::ErrorKind::FileTooLarge => Err(AddFileError::TooLarge),
-                    _ => Err(AddFileError::IOError(e))
-                }
-            }
+            Ok(())
         }
 
         async fn get_flag_id(
@@ -998,7 +996,7 @@ mod test {
     }
 
     async fn try_request(request: Request<Body>, rw: bool) -> Response {
-        routes(API_V1, !rw, false, 10)
+        routes(API_V1, !rw, false, 10, 1024, 1024)
             .with_state(test_state())
             .oneshot(request)
             .await

@@ -10,14 +10,13 @@ use glc::{
     pagination::{Anchor, Direction, Facet, Limit, SortBy, Pagination, Seek, SeekLink}
 };
 use mime::Mime;
-use sha2::{Digest, Sha256};
 use std::{
-    fs::File,
     future::Future,
     io::{self, Write},
-    path::PathBuf
+    path::{Path, PathBuf}
 };
 use tokio::{
+    fs::File,
     io::{AsyncRead, AsyncReadExt, AsyncSeek, AsyncSeekExt, AsyncWriteExt},
     runtime::Handle
 };
@@ -355,76 +354,14 @@ where
         release: Release,
         filename: &str,
         content_type: Option<&Mime>,
-        content_length: Option<u64>,
-        stream: Box<dyn Stream<Item = Result<Bytes, io::Error>> + Send + Unpin>
+        size: u64,
+        sha256: &str,
+        path: &Path,
+        mut file: &mut File
     ) -> Result<(), AddFileError>
     {
         info!("starting add_file");
         let now = self.now_nanos()?;
-
-        // ensure the filename is valid
-        let filename = safe_filename(filename)
-            .or(Err(AddFileError::InvalidFilename))?;
-
-        // write the stream to a file
-        let mut file = TempFile::new_in(&*self.upload_dir)
-            .await
-            .map_err(io::Error::other)?;
-
-        info!("created temp file {}", file.file_path().display());
-
-        let stream = Box::into_pin(stream);
-
-/*
-        let (sha256, size) = stream_to_writer(stream, &mut file)
-            .await?;
-*/
-
-        let mut reader = StreamReader::new(stream);
-        let handle = Handle::current();
-
-        let tmp_path = file.file_path().clone();
-
-        let (sha256, size) = tokio::task::spawn_blocking(move || {
-            let mut hasher = Sha256::new();
-            let mut buf = vec![0; 4096];
-            let mut size = 0u64;
-
-            let mut file = File::create(tmp_path)?;
-
-            loop {
-                match handle.block_on((&mut reader).read(&mut buf)) {
-                    Ok(0) => {
-                        let sha256 = format!("{:x}", hasher.finalize());
-                        break Ok((sha256, size))
-                    },
-                    Ok(r) => {
-                        hasher.update(&buf[..r]);
-                        file.write_all(&buf[..r])?;
-                        size += r as u64;
-                    },
-                    Err(e) => return Err(e)
-                }
-            }
-        })
-        .await
-        .map_err(std::io::Error::other)??;
-
-
-
-        info!("wrote temp file {}", file.file_path().display());
-
-        // check that the content length, if given, matches what was read
-        if content_length.is_some_and(|cl| cl != size) {
-            // we know the stream is shorter because were it longer, it
-            // would already have failed from hitting the limit
-            return Err(
-                io::Error::new(
-                    io::ErrorKind::UnexpectedEof,
-                    "stream shorter than Content-Length"
-                )
-            )?;
-        }
 
         // try to infer the MIME type
         let ext = filename.rsplit_once('.').map(|(_, ext)| ext);
@@ -455,7 +392,7 @@ where
             Some(ext @ "vmod") |
             Some(ext @ "vsav") => {
                 file.rewind().await?;
-                match dump_moduledata(file.file_path()).await {
+                match dump_moduledata(path).await {
                     // we found moduledata
                     Ok(md) => {
                         let (mver, vver) = check_moduledata(&md, ext).await?;
@@ -478,7 +415,7 @@ where
             _ => None
         };
 
-        info!("checked version of temp file {}", file.file_path().display());
+//        info!("checked version of temp file {}", file.file_path().display());
 
         // add hash prefix to file upload path
         let bucket_path = format!(
@@ -487,11 +424,11 @@ where
             &sha256[1..2]
         );
 
-        info!("going to rewind temp file {}", file.file_path().display());
+//        info!("going to rewind temp file {}", file.file_path().display());
 
         file.rewind().await?;
 
-        info!("starting to upload temp file {}", file.file_path().display());
+//        info!("starting to upload temp file {}", file.file_path().display());
 
         let url = self.uploader.upload_with_content_type(
             &bucket_path,
@@ -500,7 +437,7 @@ where
         )
         .await?;
 
-        info!("finished upload of temp file {}", file.file_path().display());
+//        info!("finished upload of temp file {}", file.file_path().display());
 
         // update record
         self.db.add_file_url(
@@ -551,8 +488,10 @@ where
         proj: Project,
         filename: &str,
         content_type: &Mime,
-        content_length: Option<u64>,
-        stream: Box<dyn Stream<Item = Result<Bytes, io::Error>> + Send + Unpin>
+        size: u64,
+        sha256: &str,
+        path: &Path,
+        file: &mut File
     ) -> Result<(), AddImageError>
     {
         let now = self.now_nanos()?;
@@ -561,8 +500,9 @@ where
         let url = self.upload_image(
             filename,
             content_type,
-            content_length,
-            stream,
+            size,
+            sha256,
+            file,
             now
         ).await?;
 
@@ -622,8 +562,10 @@ where
         proj: Project,
         filename: &str,
         content_type: &Mime,
-        content_length: Option<u64>,
-        stream: Box<dyn Stream<Item = Result<Bytes, io::Error>> + Send + Unpin>
+        size: u64,
+        sha256: &str,
+        path: &Path,
+        file: &mut File
     ) -> Result<(), AddImageError>
     {
         let now = self.now_nanos()?;
@@ -632,8 +574,9 @@ where
         let url = self.upload_image(
             filename,
             content_type,
-            content_length,
-            stream,
+            size,
+            sha256,
+            file,
             now
         ).await?;
 
@@ -1000,40 +943,15 @@ where
         &self,
         filename: &str,
         content_type: &Mime,
-        content_length: Option<u64>,
-        stream: Box<dyn Stream<Item = Result<Bytes, io::Error>> + Send + Unpin>,
+        size: u64,
+        sha256: &str,
+        mut file: &mut File,
         now: i64
     ) -> Result<String, AddImageError>
     {
         // MIME type should be an image
         if !supported_image_type(content_type) {
             return Err(AddImageError::BadMimeType);
-        }
-
-        // ensure the filename is valid
-        let filename = safe_filename(filename)
-            .or(Err(AddImageError::InvalidFilename))?;
-
-        // write the stream to a file
-        let mut file = TempFile::new_in(&*self.upload_dir)
-            .await
-            .map_err(io::Error::other)?;
-
-        let stream = Box::into_pin(stream);
-
-        let (sha256, size) = stream_to_writer(stream, &mut file)
-            .await?;
-
-        // check that the content length, if given, matches what was read
-        if content_length.is_some_and(|cl| cl != size) {
-            // we know the stream is shorter because were it longer, it
-            // would already have failed from hitting the limit
-            return Err(
-                io::Error::new(
-                    io::ErrorKind::UnexpectedEof,
-                    "stream shorter than Content-Length"
-                )
-            )?;
         }
 
         // add hash prefix to file upload path

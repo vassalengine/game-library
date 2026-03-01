@@ -1,6 +1,5 @@
 use async_trait::async_trait;
 use axum::body::Bytes;
-use futures::Stream;
 use glc::{
     discourse::UserUpdateParams,
     model::{Flags, Projects, ProjectData, Publishers, Tags, Users}
@@ -8,8 +7,10 @@ use glc::{
 use mime::Mime;
 use std::{
     io,
+    path::Path,
     sync::Arc
 };
+use tokio::fs::File;
 use thiserror::Error;
 
 use crate::{
@@ -560,8 +561,11 @@ pub trait Core {
         _release: Release,
         _filename: &str,
         _content_type: Option<&Mime>,
-        _content_length: Option<u64>,
-        _stream: Box<dyn Stream<Item = Result<Bytes, io::Error>> + Send + Unpin>
+        _size: u64,
+        _sha256: &str,
+        _path: &Path,
+        mut _file: &mut File
+
     ) -> Result<(), AddFileError>
     {
         unimplemented!();
@@ -599,8 +603,10 @@ pub trait Core {
         _proj: Project,
         _img_name: &str,
         _content_type: &Mime,
-        _content_length: Option<u64>,
-        _stream: Box<dyn Stream<Item = Result<Bytes, io::Error>> + Send + Unpin>
+        _size: u64,
+        _sha256: &str,
+        _path: &Path,
+        mut _file: &mut File
     ) -> Result<(), AddImageError>
     {
         unimplemented!();
@@ -641,8 +647,10 @@ pub trait Core {
         _proj: Project,
         _img_name: &str,
         _content_type: &Mime,
-        _content_length: Option<u64>,
-        _stream: Box<dyn Stream<Item = Result<Bytes, io::Error>> + Send + Unpin>
+        _size: u64,
+        _sha256: &str,
+        _path: &Path,
+        mut _file: &mut File
     ) -> Result<(), AddImageError>
     {
         unimplemented!();
