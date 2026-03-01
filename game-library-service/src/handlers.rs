@@ -256,9 +256,9 @@ where
         InspectWriter::new(
             file,
             |buf| {
+                hasher.update(buf);
                 off += buf.len();
                 info!("{off}");
-                hasher.update(buf);
             }
         )
     );
