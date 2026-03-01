@@ -2,7 +2,6 @@ use async_tempfile::TempFile;
 use axum::{
     body::Bytes,
     extract::{Path, Request, State},
-    http::StatusCode,
     response::{Json, Redirect}
 };
 use axum_extra::{
@@ -16,12 +15,10 @@ use glc::{
     model::{Flags, ProjectData, Projects, Publishers, Tags, Users}
 };
 use http_body_util::{BodyExt, Limited, LengthLimitError};
-use mime::Mime;
 use sha2::{Digest, Sha256};
 use std::{
     error::Error,
-    io,
-    path::{self, PathBuf}
+    io
 };
 use tokio::io::{AsyncWrite, BufWriter};
 use tokio_util::io::{InspectWriter, StreamReader};

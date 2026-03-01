@@ -1,8 +1,5 @@
-use async_tempfile::TempFile;
 use async_trait::async_trait;
-use axum::body::Bytes;
 use chrono::{DateTime, Utc};
-use futures::Stream;
 use futures_util::future::try_join_all;
 use glc::{
     discourse::UserUpdateParams,
@@ -12,15 +9,13 @@ use glc::{
 use mime::Mime;
 use std::{
     future::Future,
-    io::{self, Write},
+    io,
     path::{Path, PathBuf}
 };
 use tokio::{
     fs::File,
-    io::{AsyncRead, AsyncReadExt, AsyncSeek, AsyncSeekExt, AsyncWriteExt},
-    runtime::Handle
+    io::{AsyncRead, AsyncReadExt, AsyncSeek, AsyncSeekExt}
 };
-use tokio_util::io::StreamReader;
 use tracing::info;
 use unicode_ccc::{CanonicalCombiningClass, get_canonical_combining_class};
 use unicode_normalization::UnicodeNormalization;
@@ -35,7 +30,7 @@ use crate::{
     module::{dump_moduledata, versions_in_moduledata},
     params::ProjectsParams,
     time::{self, nanos_to_rfc3339, rfc3339_to_nanos},
-    upload::{Uploader, safe_filename},
+    upload::Uploader,
     version::Version
 };
 

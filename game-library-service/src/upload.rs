@@ -1,6 +1,4 @@
-use axum::body::Bytes;
 use http::header::{HeaderMap, HeaderName, HeaderValue};
-use futures::Stream;
 use regex::Regex;
 use s3::{
     bucket::Bucket,
@@ -13,16 +11,10 @@ use s3::{
 };
 use std::{
     future::Future,
-    io,
     sync::LazyLock
 };
 use thiserror::Error;
-use tokio::{
-    io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt, BufWriter},
-    runtime::Handle
-};
-use tokio_util::io::{InspectWriter, StreamReader};
-use tracing::info;
+use tokio::io::AsyncRead;
 
 #[derive(Debug, Error)]
 pub enum UploadError {

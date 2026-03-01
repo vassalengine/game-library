@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use axum::body::Bytes;
 use glc::{
     discourse::UserUpdateParams,
     model::{Flags, Projects, ProjectData, Publishers, Tags, Users}
