@@ -413,7 +413,10 @@ mod test {
         pagination::{Anchor, Direction, Limit, SortBy, Pagination, Seek, SeekLink}
     };
     use mime::{APPLICATION_JSON, IMAGE_PNG, TEXT_PLAIN, Mime};
-    use std::sync::LazyLock;
+    use std::{
+        path::Path,
+        sync::LazyLock
+    };
     use tokio::fs::File;
     use tokio_util::io::StreamReader;
     use tower::ServiceExt; // for oneshot
