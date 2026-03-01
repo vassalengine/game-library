@@ -1,10 +1,7 @@
 use async_tempfile::TempFile;
 use axum::{
     body::Bytes,
-    extract::{
-        Multipart, Path, Request, State,
-        multipart::{Field, MultipartError}
-    },
+    extract::{Path, Request, State},
     http::StatusCode,
     response::{Json, Redirect}
 };
@@ -243,25 +240,6 @@ fn limit_content_length(
         .ok_or(AppError::TooLarge)
 }
 
-impl From<MultipartError> for AppError {
-    fn from(err: MultipartError) -> Self {
-        match err.status() {
-            StatusCode::PAYLOAD_TOO_LARGE => AppError::TooLarge,
-            StatusCode::BAD_REQUEST => AppError::MalformedUpload,
-            _ => AppError::InternalError(err.to_string())
-        }
-    }
-}
-
-fn wrap_multipart_error(err: MultipartError) -> io::Error {
-    // convert MultipartError from stream into io::Error
-    match err.status() {
-        StatusCode::PAYLOAD_TOO_LARGE => io::ErrorKind::FileTooLarge.into(),
-        StatusCode::BAD_REQUEST => io::ErrorKind::InvalidData.into(),
-        _ => io::Error::other(err)
-    }
-}
-
 async fn write_file<F>(
     stream: impl Stream<Item = Result<Bytes, io::Error>>  + Unpin,
     file: &mut F
@@ -290,43 +268,6 @@ where
     let sha256 = format!("{:x}", hasher.finalize());
 
     Ok((sha256, size))
-}
-
-async fn multipart_to_temp_file(
-    filename: &str,
-    upload_dir: &std::path::Path,
-    mut multipart: Multipart
-) -> Result<(TempFile, u64, String, Option<Mime>), AppError>
-{
-    // ensure the filename is valid
-    let filename = safe_filename(&filename)
-        .or(Err(AppError::MalformedQuery))?;
-
-    let Some(field) = multipart.next_field().await? else {
-        return Err(AppError::MalformedUpload);
-    };
-
-    let content_type = field.content_type()
-        .map(|ct| ct.parse::<Mime>().or(Err(AppError::BadMimeType)))
-        .transpose()?;
-
-    let mut file = TempFile::new_in(upload_dir)
-        .await
-        .map_err(|e| AppError::InternalError(e.to_string()))?;
-
-    let file_path = file.file_path().to_owned();
-
-    info!("created temp file {}", file_path.display());
-
-    let stream = field.map_err(wrap_multipart_error);
-
-    let (sha256, size) = write_file(stream, &mut file)
-        .await
-        .map_err(|e| AppError::InternalError(e.to_string()))?;
-
-    info!("wrote temp file {}", file_path.display());
-
-    Ok((file, size, sha256, content_type))
 }
 
 async fn stream_to_temp_file<S>(
@@ -360,7 +301,6 @@ where
 
     Ok((file, size, sha256))
 }
-
 
 pub async fn file_post(
     Owned(owner, proj): Owned,
