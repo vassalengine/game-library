@@ -117,9 +117,7 @@ fn routes(
     api: &str,
     read_only: bool,
     log_headers: bool,
-    upload_timeout: u64,
-    max_file_size: usize,
-    max_image_size: usize
+    upload_timeout: u64
 ) -> Router<AppState> {
     // set up our routes under api
     let api_router = Router::new()
@@ -371,8 +369,6 @@ async fn run() -> Result<(), StartupError> {
         config.read_only,
         config.log_headers,
         config.upload_timeout,
-        config.max_file_size,
-        config.max_image_size
     ).with_state(state);
 
     let ip: IpAddr = config.listen_ip.parse()?;
@@ -993,7 +989,7 @@ mod test {
     }
 
     async fn try_request(request: Request<Body>, rw: bool) -> Response {
-        routes(API_V1, !rw, false, 10, MAX_FILE_SIZE, MAX_IMAGE_SIZE)
+        routes(API_V1, !rw, false, 10)
             .with_state(test_state())
             .oneshot(request)
             .await
