@@ -62,5 +62,9 @@ jobs:
           cd user-management-service
           DATABASE_URL=sqlite://users.db sqlx database setup
 
+      - name: Make the uploads directory
+        run: |
+          mkdir -p game-library-service/uploads
+
       - name: Run tests
         run: cargo test
