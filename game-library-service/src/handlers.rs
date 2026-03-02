@@ -20,7 +20,7 @@ use std::{
     error::Error,
     io
 };
-use tokio::io::{AsyncWrite, BufWriter};
+use tokio::io::{AsyncReadExt, AsyncWrite, AsyncWriteExt, BufWriter};
 use tokio_util::io::{InspectWriter, StreamReader};
 use tracing::info;
 
@@ -240,11 +240,12 @@ fn limit_content_length(
     }
 }
 
-async fn write_file<F>(
-    stream: impl Stream<Item = Result<Bytes, io::Error>>  + Unpin,
-    file: &mut F
+async fn write_file<S, F>(
+    stream: S,
+    file: F
 ) ->  Result<(String, u64), io::Error>
 where
+    S: Stream<Item = Result<Bytes, io::Error>>  + Unpin,
     F: AsyncWrite + Unpin
 {
     let mut off = 0;
@@ -268,6 +269,69 @@ where
     let sha256 = format!("{:x}", hasher.finalize());
 
     Ok((sha256, size))
+}
+
+async fn copy_stream_to_writer<S, W>(
+    stream: S,
+    mut writer: W
+) ->  Result<(String, u64), io::Error>
+where
+    S: Stream<Item = Result<Bytes, io::Error>> + Send + Unpin + 'static,
+    W: AsyncWrite + Send + Unpin + 'static
+{
+    let (r_tx, mut r_rx) = tokio::sync::mpsc::channel(1);
+    let (w_tx, mut w_rx) = tokio::sync::mpsc::channel(1);
+
+    let rfut: tokio::task::JoinHandle<Result<_, io::Error>> = tokio::spawn(async move {
+        let mut reader = StreamReader::new(stream);
+        let mut buf = Vec::with_capacity(8192);
+
+        loop {
+            buf.clear();
+
+            match reader.read_buf(&mut buf).await? {
+                0 => break,
+                _ => { w_tx.send(buf).await.map_err(io::Error::other)?; }
+            };
+
+            buf = match r_rx.recv().await {
+                Some(buf) => buf,
+                None => break
+            };
+        }
+
+        Ok(())
+    });
+
+    let wfut = tokio::spawn(async move {
+        let mut hasher = Sha256::new();
+        let mut off = 0;
+
+        let mut buf = Vec::with_capacity(8192);
+
+        loop {
+            // we don't care if this is received; it won't be in the
+            // case where the input stream is empty
+            let _ = r_tx.send(buf).await;
+
+            buf = match w_rx.recv().await {
+                Some(buf) => buf,
+                None => break
+            };
+
+            hasher.update(&buf[..]);
+            writer.write_all(&buf[..]).await?;
+            off += buf.len() as u64;
+            info!("{off} {}", buf.len());
+        }
+
+        let sha256 = format!("{:x}", hasher.finalize());
+
+        Ok((sha256, off))
+    });
+
+    rfut.await??;
+    wfut.await?
 }
 
 /*
@@ -311,7 +375,7 @@ async fn stream_to_temp_file<S>(
     stream: S
 ) -> Result<(TempFile, u64, String), AppError>
 where
-    S: Stream<Item = Result<Bytes, io::Error>> + Unpin
+    S: Stream<Item = Result<Bytes, io::Error>> + Send + Unpin + 'static
 {
     // ensure the filename is valid
     let filename = safe_filename(filename)
@@ -325,7 +389,12 @@ where
 
     info!("created temp file {}", file_path.display());
 
-    let (sha256, size) = write_file(stream, &mut file)
+    let writer = file.try_clone()
+        .await
+        .map_err(|e| AppError::InternalError(e.to_string()))?;
+
+//    let (sha256, size) = write_file4(stream, writer)
+    let (sha256, size) = copy_stream_to_writer(stream, writer)
         .await
         .map_err(|e| match e.kind() {
             io::ErrorKind::FileTooLarge => AppError::TooLarge,
