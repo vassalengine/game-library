@@ -13,7 +13,7 @@
     "@jhubbardsf/svelte-sortablejs": "^1.1.0",
     "@smui-extra/autocomplete": "^8.0.3",
     "@smui-extra/chip-input": "^8.0.3",
-    "@sveltejs/vite-plugin-svelte": "^6",
+    "@sveltejs/vite-plugin-svelte": "^7",
     "svelte": "^5",
     "vite": "^7",
     "vitest": "^4.0.18"
