@@ -39,5 +39,5 @@
 <svg class="svg-icon"><use xlink:href="#cube"></use></svg>
 <label for="package_name_input" class="form-label">Package name</label>
 <input id="package_name_input" type="text" name="package_name" class="package_tmpl_name form-control" required oninput={validatePackageName} value={pkg?.name ?? ""}>
-<label for="sort_key_input" class="form-label">Package sort key</label>
+<label for="sort_key_input" class="form-label">Package sort key <span title="The package sort key is an integer used to sort this package with respect to other packages. E.g., a package with a sort key of 0 will sort before a package with a sort key of 1."><svg class="svg-icon"><use xlink:href="#info-circle"></use></svg></span></label>
 <input id="sort_key_input" type="number" min={Number.MIN_SAFE_INTEGER} max={Number.MAX_SAFE_INTEGER} step="1" name="sort_key" class="package_tmpl_name form-control" required oninput={validatePackageSortKey} value={pkg?.sort_key ?? ""}>

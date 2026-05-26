@@ -220,10 +220,7 @@ details[open] > summary::before {
     {#if editRelease}
     <li class="release_tmpl_top border rounded p-3 my-2">
       <form action="" onsubmit={submitRelease}>
-        <input id="release_version_input" class="release_tmpl_name form-control" type="text" name="release_version" required oninput={validateReleaseVersion}>
-<!--
-        <input id="release_file_input" class="release_tmpl_name form-control" type="file" name="release_file" required>
--->
+        <input id="release_version_input" class="release_tmpl_name form-control" type="text" name="release_version" placeholder="Enter the version of the new release" required oninput={validateReleaseVersion}>
         <button class="btn btn-primary p-1 mx-1 rounded-0" type="submit" aria-label="Submit"><svg class="svg-icon"><use xlink:href="#check"></use></svg></button>
         <button class="btn btn-primary p-1 mx-1 rounded-0" type="button" aria-label="Cancel" onclick={cancelRelease}><svg class="svg-icon"><use xlink:href="#xmark"></use></svg></button>
       </form>
