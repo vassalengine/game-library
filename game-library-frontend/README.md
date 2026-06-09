@@ -11,6 +11,8 @@ Set the location of the site assets in `src/main.rs`:
 const SITE_DIR: &str = "../../../../site";
 ```
 
+Copy `config.toml.sample` to `config.toml` and adjust as desred.
+
 To build:
 ```sh
 $ cd app
