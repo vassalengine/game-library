@@ -37,7 +37,35 @@
 </script>
 
 <svg class="svg-icon"><use xlink:href="#cube"></use></svg>
-<label for="package_name_input" class="form-label">Package name</label>
-<input id="package_name_input" type="text" name="package_name" class="package_tmpl_name form-control" required oninput={validatePackageName} value={pkg?.name ?? ""}>
-<label for="sort_key_input" class="form-label">Package sort key <span title="The package sort key is an integer used to sort this package with respect to other packages. E.g., a package with a sort key of 0 will sort before a package with a sort key of 1."><svg class="svg-icon"><use xlink:href="#info-circle"></use></svg></span></label>
-<input id="sort_key_input" type="number" min={Number.MIN_SAFE_INTEGER} max={Number.MAX_SAFE_INTEGER} step="1" name="sort_key" class="package_tmpl_name form-control" required oninput={validatePackageSortKey} value={pkg?.sort_key ?? ""}>
+<label for="package_name_input" class="form-label">
+  Package name
+  <span title="A package is a way to structure the project into different parts.  Each package name should tell what this part contains - e.g., &quot;Module&quot;.  Package names are not release names - releases are sub-ordinate to packages.">
+    <svg class="svg-icon">
+      <use xlink:href="#circle-question"></use>
+    </svg>
+  </span>
+</label>
+<input id="package_name_input"
+       type="text"
+       name="package_name"
+       class="package_tmpl_name form-control"
+       required
+       title="Input the package name, for example &quot;Module&quot;"
+       oninput={validatePackageName} value={pkg?.name ?? ""}>
+<label for="sort_key_input"
+       class="form-label">Package sort key
+  <span title="The package sort key is an integer used to sort this package with respect to other packages. E.g., a package with a sort key of 0 will sort before a package with a sort key of 1.">
+    <svg class="svg-icon">
+      <use xlink:href="#circle-question"></use>
+    </svg>
+  </span>
+</label>
+<input id="sort_key_input"
+       type="number"
+       min={Number.MIN_SAFE_INTEGER}
+       max={Number.MAX_SAFE_INTEGER}
+       step="1"
+       name="sort_key"
+       class="package_tmpl_name form-control"
+       required
+       oninput={validatePackageSortKey} value={pkg?.sort_key ?? ""}>

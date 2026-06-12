@@ -97,16 +97,38 @@ figure:hover #new_image_label {
     {@const src = client.imageUrl(img.filename)}
     <GalleryEditorItem {img} {src} {deleteItem} />
   {/each}
-    <figure id="new_image_figure" class="figure col-lg-3 col-md-4 col-6 px-1">
-      <label id="new_image_label" for="new_image_input" class="figure-img img-fluid img-thumbnail">
+    <figure id="new_image_figure"
+            class="figure col-lg-3 col-md-4 col-6 px-1">
+      <label id="new_image_label"
+             for="new_image_input"
+             title="Add a new image to the gallery.  Make sure that image file names are unique, for example by adding the release number to the image file name"
+             class="figure-img img-fluid img-thumbnail">
         <div id="new_image_add_overlay">
           <svg><use xlink:href="#plus"></use></svg>
         </div>
       </label>
-      <input id="new_image_input" type="file" accept="image/png, image/jpeg, image/svg+xml, image/webp, image/avif" onchange={submitImage}>
+      <input id="new_image_input"
+             type="file"
+             accept="image/png, image/jpeg, image/svg+xml, image/webp, image/avif"
+             onchange={submitImage}>
     </figure>
   </SortableList>
 
-  <button type="submit" aria-label="Submit" class="btn btn-primary"><svg class="svg-icon"><use xlink:href="#check"></use></svg></button>
-  <button type="button" aria-label="Cancel" class="btn btn-primary" onclick={cancelEdit}><svg class="svg-icon"><use xlink:href="#xmark"></use></svg></button>
+  <button type="submit"
+          aria-label="Submit"
+          title="Save changes"
+          class="btn btn-primary">
+    <svg class="svg-icon">
+      <use xlink:href="#check"></use>
+    </svg>
+  </button>
+  <button type="button"
+          aria-label="Cancel"
+          class="btn btn-primary"
+          title="Cancel edits"
+          onclick={cancelEdit}>
+    <svg class="svg-icon">
+      <use xlink:href="#xmark"></use>
+    </svg>
+  </button>
 </form>

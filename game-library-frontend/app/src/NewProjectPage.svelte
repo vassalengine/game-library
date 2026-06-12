@@ -111,11 +111,40 @@
     <div class="container">
       <div class="row">
         <form action="" onsubmit={submitEdit}>
-          <label for="project_name_input" class="form-label">Project name</label>
-          <input id="project_name_input" type="text" name="project_name" class="form-control" required oninput={validateProjectName}>
-          <label for="game_title_input" class="form-label">Game title</label>
-          <input id="game_title_input" type="text" name="game_title" class="form-control" required>
-          <button class="btn btn-primary p-1 mx-1 rounded-0" type="submit" aria-label="Submit"><svg class="svg-icon"><use xlink:href="#check"></use></svg></button>
+          <label for="project_name_input"
+                 class="form-label">
+            Project name
+            <span title="Give your project a name.  The name must be at least 5 characters long, but no longer than 64 characters.  The name cannot contain leading, trailing, or consecutive whitespace. The name must only contain letters, numbers, punctuation, separators, and marks.   The name should reflect the title of the game for which the project is for, and should also contain your username. For example &quot;the_greatest_game_of_all_janedoe&quot;. The project name cannot be changed later on (except by administrators).">
+              <svg class="svg-icon">
+                <use xlink:href="#circle-question"></use>
+              </svg>
+            </span>
+          </label>
+          <input id="project_name_input"
+                 type="text" name="project_name"
+                 class="form-control"
+                 required oninput={validateProjectName}>
+          <label for="game_title_input"
+                 class="form-label">
+            Game title
+            <span title="Specify the title of the game for which you are creating a project.  The title should be as it is listed on BoardGameGeek.com.  The game title can be edited later on.">
+              <svg class="svg-icon">
+                <use xlink:href="#circle-question"></use>
+              </svg>
+            </span>
+          </label>
+          <input id="game_title_input"
+                 type="text"
+                 name="game_title"
+                 class="form-control" required>
+          <button class="btn btn-primary p-1 mx-1 rounded-0"
+                  type="submit"
+                  title="Create the project"
+                  aria-label="Submit">
+            <svg class="svg-icon">
+              <use xlink:href="#check"></use>
+            </svg>
+          </button>
         </form>
       </div>
     </div>

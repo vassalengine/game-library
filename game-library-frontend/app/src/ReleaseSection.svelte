@@ -260,11 +260,23 @@
 </style>
 
 <div>
-  <div class="badge rounded-pill fs-5" class:current_release={current} class:release={!current}>{release.version}</div>
-  <button class="edit_button" class:is_editable={!editing && user_is_owner()} type="button" aria-label="Add" onclick={startFile}>
+  <div class="badge rounded-pill fs-5"
+       class:current_release={current}
+       class:release={!current}>{release.version}</div>
+  <button class="edit_button"
+          class:is_editable={!editing && user_is_owner()}
+          type="button"
+          aria-label="Add"
+          title="Upload a file to this release"
+          onclick={startFile}>
     <svg class="svg-icon edit_icon"><use xlink:href="#plus"></use></svg>
   </button>
-  <button class="delete_button" class:is_deletable={!editing && user_is_owner() && release.files.length == 0} type="button" aria-label="Delete" onclick={deleteRelease}>
+  <button class="delete_button"
+          class:is_deletable={!editing && user_is_owner() && release.files.length == 0}
+          type="button"
+          aria-label="Delete"
+          title="Remove this release from the package"
+          onclick={deleteRelease}>
       <svg class="svg-icon delete_icon"><use xlink:href="#trash-can"></use></svg>
   </button>
 </div>
@@ -276,15 +288,53 @@
     <ErrorBox {error} />
     {/if}
     <form action="" onsubmit={submitFile}>
-      <input id="file_input" class="form-control" type="file" name="file" required style:display={uploading ? 'none' : 'inline'} onchange={validateFile}>
+      <label for="file_input" class="form-label">
+        File
+        <span title="Upload a file to this release.  If you are uploading a module file (.vmod), make sure that the internal version number of the release is set to {release.version}.  Filenames, in particular of module (.vmod) and extension (.vmdx) files, should also contain the release number ({release.version}), e.g., {proj.name}-{release.version}.vmod">
+           <svg class="svg-icon">
+            <use xlink:href="#circle-question"></use>
+          </svg>
+        </span>
+      </label>
+      <input id="file_input"
+             class="form-control"
+             type="file"
+             name="file"
+             required
+             style:display={uploading ? 'none' : 'inline'}
+             onchange={validateFile}>
       {#if !uploading}
-      <button class="btn btn-primary p-1 mx-1 rounded-0" aria-label="Submit" type="submit"><svg class="svg-icon"><use xlink:href="#check"></use></svg></button>
-      <button class="btn btn-primary p-1 mx-1 rounded-0" type="button" aria-label="Cancel" onclick={cancelFile}><svg class="svg-icon"><use xlink:href="#xmark"></use></svg></button>
+      <button class="btn btn-primary p-1 mx-1 rounded-0"
+              aria-label="Submit"
+              title="Upload the specified file"
+              type="submit">
+         <svg class="svg-icon">
+           <use xlink:href="#check"></use>
+         </svg>
+      </button>
+      <button class="btn btn-primary p-1 mx-1 rounded-0"
+              type="button"
+              aria-label="Cancel"
+              title="Cancel the upload of a file"
+              onclick={cancelFile}>
+        <svg class="svg-icon">
+          <use xlink:href="#xmark"></use>
+        </svg>
+      </button>
       {:else}
       <div>{uploadFilename}</div>
       <div class="d-flex align-items-center">
-        <button class="btn btn-primary p-1 mx-1 rounded-0" type="button" aria-label="Cancel" onclick={cancelUpload}><svg class="svg-icon"><use xlink:href="#xmark"></use></svg></button>
-        <progress class="upload_progress text-primary flex-fill w-auto" value={uploadProgress} max="100"></progress>
+        <button class="btn btn-primary p-1 mx-1 rounded-0"
+                type="button"
+                aria-label="Cancel"
+                title="Cancel the on-going file upload"
+                onclick={cancelUpload}>
+          <svg class="svg-icon">
+            <use xlink:href="#xmark"></use>
+          </svg>
+        </button>
+        <progress class="upload_progress text-primary flex-fill w-auto"
+                  value={uploadProgress} max="100"></progress>
       </div>
       {/if}
     </form>

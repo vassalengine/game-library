@@ -184,9 +184,22 @@
 {#if error}
 <ErrorBox {error} />
 {/if}
-<button class="edit_button fs-2" class:is_editable={!editing && user_is_owner()} type="button" aria-label="Edit" onclick={startEdit}>
-  <svg class="svg-icon edit_icon"><use xlink:href="#pencil"></use></svg>
-</button>
+{#if proj.gallery.length > 0 || user_is_owner()}
+<h2>
+  <svg class="svg-icon">
+    <use xlink:href="#images"></use>
+  </svg>
+  Gallery
+  <button class="edit_button fs-2"
+          class:is_editable={!editing && user_is_owner()}
+          type="button" aria-label="Edit" onclick={startEdit}>
+    <svg class="svg-icon edit_icon">
+      <use xlink:href="#pencil"></use>
+    </svg>
+  </button>
+</h2>
+{/if}
+
 
 {#if edit}
 <GalleryEditor {proj} {client} {md} {submitEdit} {cancelEdit} {submitImage} {changes} />

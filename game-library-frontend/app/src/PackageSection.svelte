@@ -196,13 +196,28 @@ details[open] > summary::before {
   <h3>
     <svg class="svg-icon"><use xlink:href="#cube"></use></svg>
     {pkg.name}
-    <button class="edit_button" class:is_editable={!editing && user_is_owner()} type="button" aria-label="Add" onclick={startRelease}>
+    <button class="edit_button"
+            class:is_editable={!editing && user_is_owner()}
+            type="button"
+            aria-label="Add"
+            title="Add a new release to the package"
+            onclick={startRelease}>
       <svg class="svg-icon edit_icon"><use xlink:href="#plus"></use></svg>
     </button>
-    <button class="edit_button" class:is_editable={!editing && user_is_owner()} type="button" aria-label="Edit" onclick={startEditPackage}>
+    <button class="edit_button"
+            class:is_editable={!editing && user_is_owner()}
+            type="button"
+            aria-label="Edit"
+            title="Edit this package"
+            onclick={startEditPackage}>
       <svg class="svg-icon edit_icon"><use xlink:href="#pencil"></use></svg>
     </button>
-    <button class="delete_button" class:is_deletable={!editing && user_is_owner() && pkg.releases.length == 0} type="button" aria-label="Delete" onclick={deletePackage}>
+    <button class="delete_button"
+            class:is_deletable={!editing && user_is_owner() && pkg.releases.length == 0}
+            type="button"
+            aria-label="Delete"
+            title="Delete this package"
+            onclick={deletePackage}>
       <svg class="svg-icon delete_icon"><use xlink:href="#trash-can"></use></svg>
     </button>
   </h3>
@@ -211,8 +226,22 @@ details[open] > summary::before {
     <div class="package_tmpl_top border rounded p-3 my-2">
       <form action="" onsubmit={submitEditPackage}>
         <PackageEditor {pkg} packages={proj.packages} />
-        <button class="btn btn-primary p-1 mx-1 rounded-0" type="submit" aria-label="Submit"><svg class="svg-icon"><use xlink:href="#check"></use></svg></button>
-        <button class="btn btn-primary p-1 mx-1 rounded-0" type="button" aria-label="Cancel" onclick={cancelEditPackage}><svg class="svg-icon"><use xlink:href="#xmark"></use></svg></button>
+        <button class="btn btn-primary p-1 mx-1 rounded-0"
+                type="submit"
+                title="Save changes to the package"
+                aria-label="Submit">
+          <svg class="svg-icon">
+            <use xlink:href="#check"></use>
+          </svg></button>
+        <button class="btn btn-primary p-1 mx-1 rounded-0"
+                type="button"
+                aria-label="Cancel"
+                title="Cancel changes to the package"
+                onclick={cancelEditPackage}>
+          <svg class="svg-icon">
+            <use xlink:href="#xmark"></use>
+          </svg>
+        </button>
       </form>
     </div>
   {/if}
@@ -220,9 +249,38 @@ details[open] > summary::before {
     {#if editRelease}
     <li class="release_tmpl_top border rounded p-3 my-2">
       <form action="" onsubmit={submitRelease}>
-        <input id="release_version_input" class="release_tmpl_name form-control" type="text" name="release_version" placeholder="Enter the version of the new release" required oninput={validateReleaseVersion}>
-        <button class="btn btn-primary p-1 mx-1 rounded-0" type="submit" aria-label="Submit"><svg class="svg-icon"><use xlink:href="#check"></use></svg></button>
-        <button class="btn btn-primary p-1 mx-1 rounded-0" type="button" aria-label="Cancel" onclick={cancelRelease}><svg class="svg-icon"><use xlink:href="#xmark"></use></svg></button>
+        <label for="release_version_input" class="form-label">
+          Release number
+          <span title="Input the release number of the new release.  Release numbers must follow the Semantic Versioning standard i.e., major.minor.patch, major.minor.patch-prerelease, major.minor.patch+build, or major.minor.patch-prerelease+build, where major, minor, and patch are non-negative whole numbers, while prerelease and build are arbitrary strings.">
+            <svg class="svg-icon">
+              <use xlink:href="#circle-question"></use>
+            </svg>
+          </span>
+        </label>
+        <input id="release_version_input"
+               class="release_tmpl_name form-control"
+               type="text"
+               name="release_version"
+               placeholder="Enter the version of the new release"
+               required
+               oninput={validateReleaseVersion}>
+        <button class="btn btn-primary p-1 mx-1 rounded-0"
+                type="submit"
+                title="Save the release"
+                aria-label="Submit">
+          <svg class="svg-icon">
+            <use xlink:href="#check"></use>
+          </svg>
+        </button>
+        <button class="btn btn-primary p-1 mx-1 rounded-0"
+                type="button"
+                aria-label="Cancel"
+                title="Cancel the new release"
+                onclick={cancelRelease}>
+          <svg class="svg-icon">
+            <use xlink:href="#xmark"></use>
+          </svg>
+        </button>
       </form>
     </li>
     {/if}

@@ -81,7 +81,11 @@
   <h2>
     <svg class="svg-icon"><use xlink:href="#cubes"></use></svg>
     Packages
-    <button class="edit_button" class:is_editable={!editing && user_is_owner()} type="button" aria-label="Edit" onclick={startEdit}>
+    <button class="edit_button"
+            class:is_editable={!editing && user_is_owner()}
+            type="button"
+            title="Add a package"
+            aria-label="Edit" onclick={startEdit}>
       <svg class="svg-icon edit_icon"><use xlink:href="#plus"></use></svg>
     </button>
   </h2>

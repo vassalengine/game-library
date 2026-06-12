@@ -86,8 +86,15 @@
   <h2>
     <svg class="svg-icon"><use xlink:href="#person-digging"></use></svg>
     Project
-    <button class="edit_button" class:is_editable={!editing && user_is_owner()}  type="button" aria-label="Edit" onclick={startEdit}>
-      <svg class="svg-icon edit_icon"><use xlink:href="#pencil"></use></svg>
+    <button class="edit_button"
+            class:is_editable={!editing && user_is_owner()}
+            type="button"
+            aria-label="Edit"
+            title="Edit this project"
+            onclick={startEdit}>
+      <svg class="svg-icon edit_icon">
+        <use xlink:href="#pencil"></use>
+      </svg>
     </button>
   </h2>
 {#if edit}
