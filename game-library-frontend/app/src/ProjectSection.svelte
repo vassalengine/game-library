@@ -77,8 +77,90 @@
     editing = false;
   }
 
-</script>
+  //
+  // Feedback and forum search
+  //
+  const forumURL = "https://forum.vassalengine.org/";
+  const projectsURL = "https://vassalengine.org/library/projects/"
 
+  function gameEncoded() {
+    return encodeURIComponent( "[" + proj.game.title + "]" );
+  }
+
+  function projectURL() {
+    return projectsURL+proj.name;
+  }
+
+  function projectQueryComponent(forum) {
+    return encodeURIComponent(proj.name+" "+proj.game.title+" #"+forum);
+  }
+
+  function projectQuery(forum) {
+    const url = forumURL + "search?q=" + projectQueryComponent(forum);
+    window.open(url, '_blank').focus();
+  }
+
+  function searchDiscussion(event) {
+    projectQuery("module-discussion");
+  }
+
+  function searchSupport(event) {
+    projectQuery("module-support");
+  }
+
+  function projectLink() {
+    return encodeURIComponent("Regarding the project [" + proj.game.title + "](" + projectURL() + ").");
+  }
+
+  function forumPost(forum) {
+    const url = forumURL + "new-topic?title=" + gameEncoded() + "&body=" + projectLink() + "&category=" + forum;
+    window.open(url, '_blank').focus();
+  }
+
+  function postDiscussion(event) {
+    forumPost("module-discussion");
+  }
+
+  function postSupport(event) {
+    forumPost("module-support");
+  }
+
+
+  function messageOwners(event) {
+    const owners = proj.owners.join(",");
+    const url    = forumURL+"new-message?username="+owners+"&title="+gameEncoded()+"&body="+projectLink();
+    window.open(url, '_blank').focus();
+  }
+  /*
+    Search: https://forum.vassalengine.org/search?q=anzio%2Bbeachhead%20anzio_beachhead_cholmcc%20%23module-discussion
+    Post: https://forum.vassalengine.org/new-topic?title=https://vassalengine.org/library/projects/anzio_beachhead_cholmcc&category=module-discussion
+  */
+</script>
+<style>
+  .forum-category::before {
+    content: "";
+    display: inline-block;
+    margin-right: 0.125em;
+    width: 0.75em;
+    height: 0.75em;
+    border-radius: 2pt;
+    background-color: var(--forum-category-color);
+    flex: 0 0 auto;
+  }
+  .module-discussion {
+    --forum-category-color: #3AB54A;
+  }
+  .module-support {
+    --forum-category-color: #25AAE2;
+  }
+  .message-button {
+    padding-left: .2em !important;
+    padding-right: .3em !important;
+  }
+  .m-r-1 {
+    margin-right: .3em !important;
+  }
+</style>
 {#if error}
 <ErrorBox {error} />
 {/if}
@@ -111,6 +193,74 @@
             <li><UserChip {ums_url} username={owner} size=24 /></li>
           {/each}
           </ul>
+          <button class="btn btn-primary p-0 message-button"
+                  type="button"
+                  title="Send direct message to all project owners"
+                  onclick={messageOwners}>
+            <svg class="svg-icon">
+              <use xlink:href="#envelope"></use>
+            </svg>
+            <span class="d-button-label">{"Message"+(proj.owners.length>1?" all":"")}</span>
+          </button>
+        </div>
+        <div>
+          <div class="d-inline-block">
+            <svg class="svg-icon">
+              <use xlink:href="#landmark"></use>
+            </svg>
+          </div>
+          <div class="d-inline-flex align-middle">
+            <div class="d-flex flex-column m-r-1">
+              <span class="forum-category"
+                    style="--forum-category-color: #3AB54A;">
+                Module Discussion:
+              </span>
+              <span class="forum-category"
+                    style="--forum-category-color: #25AAE2;">
+                Module Support:
+              </span>
+            </div>
+            <div class="d-flex flex-column m-r-1">
+              <button class="btn p-0 mx-1"
+                      type="button"
+                      title="Search for posts on this project in the Module Discussion forum"
+                      onclick={searchDiscussion}>
+                <svg class="svg-icon">
+                  <use xlink:href="#search"></use>
+                </svg>
+                <span class="d-button-label">Search</span>
+              </button>
+              <button class="btn p-0 mx-1"
+                      type="button"
+                      title="Search for posts on this project in the Module Support forum"
+                      onclick={searchSupport}>
+                <svg class="svg-icon">
+                  <use xlink:href="#search"></use>
+                </svg>
+                <span class="d-button-label">Search</span>
+              </button>
+            </div>
+            <div class="d-flex flex-column">              
+              <button class="btn btn-light p-0 rounded-0"
+                      type="button"
+                      title="Start new topic on this project in the Module Discussion forum"
+                      onclick={postDiscussion}>
+                  <svg class="svg-icon">
+                    <use xlink:href="#pen-to-square"></use>
+                  </svg>
+                  <span class="d-button-label">New topic</span>
+              </button>
+              <button class="btn btn-light p-0 rounded-0"
+                      type="button"
+                      title="Start new topic on this project in the Module Support forum"
+                      onclick={postSupport}>
+                <svg class="svg-icon">
+                  <use xlink:href="#pen-to-square"></use>
+                </svg>
+                <span class="d-button-label">New topic</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="ms-auto">
