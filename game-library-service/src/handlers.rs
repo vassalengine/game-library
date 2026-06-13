@@ -14,6 +14,7 @@ use glc::{
     discourse::UserUpdatePost,
     model::{Flags, ProjectData, Projects, Publishers, Tags, Users}
 };
+use hex;
 use http_body_util::{BodyExt, Limited, LengthLimitError};
 use sha2::{Digest, Sha256};
 use std::{
@@ -266,7 +267,7 @@ where
 
     // read stream
     let size = tokio::io::copy(&mut reader, &mut writer).await?;
-    let sha256 = format!("{:x}", hasher.finalize());
+    let sha256 = format!("{}", hex::encode(hasher.finalize()));
 
     Ok((sha256, size))
 }
