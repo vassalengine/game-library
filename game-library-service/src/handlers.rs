@@ -326,7 +326,7 @@ where
             info!("{off} {}", buf.len());
         }
 
-        let sha256 = format!("{:x}", hasher.finalize());
+        let sha256 = format!("{}", hex::encode(hasher.finalize()));
 
         Ok((sha256, off))
     });
