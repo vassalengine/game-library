@@ -190,7 +190,7 @@
     <use xlink:href="#images"></use>
   </svg>
   Gallery
-  <button class="edit_button fs-2"
+  <button class="edit_button"
           class:is_editable={!editing && user_is_owner()}
           type="button" aria-label="Edit" onclick={startEdit}>
     <svg class="svg-icon edit_icon">
