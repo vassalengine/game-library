@@ -326,7 +326,7 @@
         <!-- svelte-ignore a11y_label_has_associated_control -->
         <label class="form-label">
           Publisher
-          <span title="Specify the publisher, if any, of the game that this project is for.  Publisher names are auto-completed on known publisers.">
+          <span title="Specify the publisher, if any, of the game that this project is for. Publisher names are auto-completed on known publisers.">
             <svg class="svg-icon">
               <use xlink:href="#circle-question"></use>
             </svg>
