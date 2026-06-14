@@ -413,7 +413,7 @@
         <label for="description_input"
                class="form-label">
           Description
-          <span title="Write a short description of the game and project.  This will be shown as a lead when searching for projects.  Note that the lead will be truncated to 256 characters.">
+          <span title="Write a short description of the game and project. This will be shown in when the project appears in search results, truncated to a maximum of 256 characters.">
             <svg class="svg-icon">
               <use xlink:href="#circle-question"></use>
             </svg>
