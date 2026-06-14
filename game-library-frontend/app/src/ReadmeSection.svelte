@@ -179,7 +179,7 @@
             <svg class="svg-icon edit_icon">
               <use xlink:href="#markdown"></use>
             </svg>
-            MarkDown
+            Markdown
           </a>
           supported.
         </span>
