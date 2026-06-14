@@ -251,7 +251,7 @@ details[open] > summary::before {
       <form action="" onsubmit={submitRelease}>
         <label for="release_version_input" class="form-label">
           Release number
-          <span title="Input the release number of the new release.  Release numbers must follow the Semantic Versioning standard i.e., major.minor.patch, major.minor.patch-prerelease, major.minor.patch+build, or major.minor.patch-prerelease+build, where major, minor, and patch are non-negative whole numbers, while prerelease and build are arbitrary strings.">
+          <span title="Input the release number of the new release. Release numbers must follow the Semantic Versioning standard: major.minor.patch, major.minor.patch-prerelease, major.minor.patch+build, or major.minor.patch-prerelease+build, where major, minor, and patch are non-negative whole numbers, and prerelease and build are arbitrary strings.">
             <svg class="svg-icon">
               <use xlink:href="#circle-question"></use>
             </svg>
