@@ -85,16 +85,18 @@ article li {
         </li>
       </ul>
     </li>
-  </ul> 
+  </ul>
 </li>
 </ul>
 
 <p>For greater detail, see the <a href="https://forum.vassalengine.org/t/how-to-upload-modules-to-the-game-library/85586">library documentation</a>.</p>
 
 {#if user_info}
-<center>
-  <a class="btn btn-primary p-2 message-button" role="button" href="{base_url}/new">Create a new project</a>
-</center>  
+<div class="d-flex justify-content-center my-5">
+  <div>
+    <a class="btn btn-primary p-2" role="button" href="{base_url}/new">Create a new project</a>
+  </div>
+</div>
 {/if}
 
 </section>
