@@ -101,7 +101,7 @@ figure:hover #new_image_label {
             class="figure col-lg-3 col-md-4 col-6 px-1">
       <label id="new_image_label"
              for="new_image_input"
-             title="Add a new image to the gallery.  Make sure that image file names are unique, for example by adding the release number to the image file name"
+             title="Add a new image to the gallery. Image filenames must be unique."
              class="figure-img img-fluid img-thumbnail">
         <div id="new_image_add_overlay">
           <svg><use xlink:href="#plus"></use></svg>
