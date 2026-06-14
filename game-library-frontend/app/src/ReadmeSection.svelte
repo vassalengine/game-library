@@ -132,7 +132,7 @@
             class:is_editable={!editing && user_is_owner()}
             type="button"
             aria-label="Edit"
-            title="Edit the project long text"
+            title="Edit the project readme"
             onclick={startEdit}>
       <svg class="svg-icon edit_icon">
         <use xlink:href="#pencil"></use>
@@ -158,7 +158,7 @@
       <form id="readme_form" action="" onsubmit={submitEdit}>
         <button type="submit"
                 aria-label="Submit"
-                title="Save changes to description"
+                title="Save changes to readme"
                 class="btn btn-primary">
           <svg class="svg-icon">
             <use xlink:href="#check"></use>

@@ -12,10 +12,6 @@
     ums_url,
     returnto
   } = $props();
-
-  function createProject(event) {
-     window.open("/library/new");
-  }
 </script>
 
 <svelte:head>
@@ -66,6 +62,7 @@ article li {
 <h2>Concepts</h2>
 </header>
 
+<p>The Module Library is hierarchical:</p>
 <ul>
 
 <li>Pages are projects.
@@ -78,7 +75,7 @@ article li {
         <li>Packages contain releases.
           <ul>
             <li>Releases have version numbers.</li>
-            <li>Release version numbers follow the <a href="https://semver.org">Semantic Versioning</a> format, which is <code>x.y.z</code> for normal releases.</li> 
+            <li>Release version numbers follow the <a href="https://semver.org">Semantic Versioning</a> format, which is <code>x.y.z</code> for normal releases.</li>
             <li>Releases contain files.
               <ul>
                 <li>A newly-uploaded module file (<code>.vmod</code>) <i>must</i> have a version number that matches the release it is uploaded to.</li>
@@ -88,21 +85,18 @@ article li {
         </li>
       </ul>
     </li>
-  </ul> 
+  </ul>
 </li>
 </ul>
 
 <p>For greater detail, see the <a href="https://forum.vassalengine.org/t/how-to-upload-modules-to-the-game-library/85586">library documentation</a>.</p>
 
 {#if user_info}
-<center>
-  <button class="btn btn-primary p-2 message-button"
-          type="button"
-          title="Press to create a new project"
-          onclick={createProject}>
-    <span class="d-button-label">Create a new project</span>
-  </button>
-</center>  
+<div class="d-flex justify-content-center my-5">
+  <div>
+    <a class="btn btn-primary p-2" role="button" href="{base_url}/new">Create a new project</a>
+  </div>
+</div>
 {/if}
 
 </section>

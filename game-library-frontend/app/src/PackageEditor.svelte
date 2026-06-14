@@ -39,7 +39,7 @@
 <svg class="svg-icon"><use xlink:href="#cube"></use></svg>
 <label for="package_name_input" class="form-label">
   Package name
-  <span title="A package is a way to structure the project into different parts.  Each package name should tell what this part contains - e.g., &quot;Module&quot;.  Package names are not release names - releases are sub-ordinate to packages.">
+  <span title="A package is a way to structure the project into different parts.  A package name should say what this part contains, e.g., &quot;Module&quot;.  Package names are not release names&emdash;releases are contained within packages.">
     <svg class="svg-icon">
       <use xlink:href="#circle-question"></use>
     </svg>

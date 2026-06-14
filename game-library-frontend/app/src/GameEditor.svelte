@@ -273,7 +273,7 @@
         <div id="box_image_delete_overlay">
           <button type="button"
                   aria-label="Clear"
-                  title="Remove the game image"
+                  title="Remove the game box image"
                   onclick={clearImage}>
             <svg class="svg-icon"><use xlink:href="#xmark"></use></svg>
           </button>
@@ -294,7 +294,7 @@
       <div class="col-12">
         <label for="game_title_input" class="form-label">
           Title
-          <span title="Specify the title of the game (or similar) that this prject implements a Vassal module for.">
+          <span title="Specify the title of the game (or similar) that this project is for.">
             <svg class="svg-icon">
               <use xlink:href="#circle-question"></use>
             </svg>
@@ -326,7 +326,7 @@
         <!-- svelte-ignore a11y_label_has_associated_control -->
         <label class="form-label">
           Publisher
-          <span title="Specify the publisher, if any, of the game that this project is for.  Publisher names are auto-completed on known publisers.">
+          <span title="Specify the publisher, if any, of the game that this project is for. Publisher names are auto-completed on known publisers.">
             <svg class="svg-icon">
               <use xlink:href="#circle-question"></use>
             </svg>
@@ -338,7 +338,7 @@
       <div class="col-4">
         <label for="game_year_input" class="form-label">
           Year
-          <span title="Specify the year the game was first published by the chosen publisher.  The year should be a positive whole number.">
+          <span title="Specify the year the game was first published by the chosen publisher.">
             <svg class="svg-icon">
               <use xlink:href="#circle-question"></use>
             </svg>
@@ -355,7 +355,7 @@
                step="1"
                name="game_players_min"
                class="form-control"
-               title="The least number of players this game can be played. If the game can be played single-handed, then this should be 1. Leaving this field blank will set the number of players to the specific value specified in the largest number of players."
+               title="The least number of players who can play the game. Leave this blank to specify no minimum."
                oninput={validatePlayersMin} bind:value={players_min}>
       </div>
       <div class="col-3">
@@ -367,7 +367,7 @@
                step="1"
                name="game_players_max"
                class="form-control"
-               title="The largest number of players that can play this game. IF there is no upper limit, then put in a very large number. If this is a stricly solitaire game, set this to 1, and leave the least number of players blank. Leaving this field blank will set the number of players to the specific value specified in the least number of players."
+               title="The greatest number of players who can play this game. Leave this blank to specify no maximum."
                oninput={validatePlayersMax} bind:value={players_max}>
       </div>
       <div class="col-3">
@@ -379,7 +379,7 @@
                step="1"
                name="game_length_min"
                class="form-control"
-               title="An estimate of the least number of minutes it will take to complete a round of this game."
+               title="An estimate of the minimum length of a game in minutes."
                oninput={validateLengthMin} bind:value={length_min}>
       </div>
       <div class="col-3">
@@ -391,14 +391,14 @@
                step="1"
                name="game_length_max"
                class="form-control"
-               title="An estimate of the largest number of minutes it will take to complete a round of this game. If a single session of the game can go on forever, then this field should be left blank."
+               title="An estimate of maximum length of a game in minutes."
                oninput={validateLengthMax} bind:value={length_max}>
       </div>
       <div class="col-12">
         <!-- svelte-ignore a11y_label_has_associated_control -->
         <label class="form-label">
           Tags
-          <span title="Specify one or more tags that apply to this game or project.  Tags are auto-completed on known tags.  Tags can be removed by pressing the &quot;x&quot;.">
+          <span title="Specify one or more tags that apply to this game or project. Tags are auto-completed on known tags.">
             <svg class="svg-icon">
               <use xlink:href="#circle-question"></use>
             </svg>
@@ -413,7 +413,7 @@
         <label for="description_input"
                class="form-label">
           Description
-          <span title="Write a short description of the game and project.  This will be shown as a lead when searching for projects.  Note that the lead will be truncated to 256 characters.">
+          <span title="Write a short description of the game and project. This will be shown in when the project appears in search results, truncated to a maximum of 256 characters.">
             <svg class="svg-icon">
               <use xlink:href="#circle-question"></use>
             </svg>

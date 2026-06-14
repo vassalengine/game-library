@@ -290,7 +290,7 @@
     <form action="" onsubmit={submitFile}>
       <label for="file_input" class="form-label">
         File
-        <span title="Upload a file to this release.  If you are uploading a module file (.vmod), make sure that the internal version number of the release is set to {release.version}.  Filenames, in particular of module (.vmod) and extension (.vmdx) files, should also contain the release number ({release.version}), e.g., {proj.name}-{release.version}.vmod">
+        <span title="Upload a file to this release. If you are uploading a module file (.vmod), make sure that the internal version number of the release is set to {release.version}. Filenames, in particular of module (.vmod) and extension (.vmdx) files, should also contain the release version ({release.version}), e.g., {proj.name}-{release.version}.vmod.">
            <svg class="svg-icon">
             <use xlink:href="#circle-question"></use>
           </svg>
@@ -327,7 +327,7 @@
         <button class="btn btn-primary p-1 mx-1 rounded-0"
                 type="button"
                 aria-label="Cancel"
-                title="Cancel the on-going file upload"
+                title="Cancel the file upload in progress"
                 onclick={cancelUpload}>
           <svg class="svg-icon">
             <use xlink:href="#xmark"></use>
