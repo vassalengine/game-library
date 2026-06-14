@@ -379,7 +379,7 @@
                step="1"
                name="game_length_min"
                class="form-control"
-               title="An estimate of the least number of minutes it will take to complete a round of this game."
+               title="An estimate of the minimum length of a game in minutes."
                oninput={validateLengthMin} bind:value={length_min}>
       </div>
       <div class="col-3">
@@ -391,7 +391,7 @@
                step="1"
                name="game_length_max"
                class="form-control"
-               title="An estimate of the largest number of minutes it will take to complete a round of this game. If a single session of the game can go on forever, then this field should be left blank."
+               title="An estimate of maximum length of a game in minutes."
                oninput={validateLengthMax} bind:value={length_max}>
       </div>
       <div class="col-12">
