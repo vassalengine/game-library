@@ -398,7 +398,7 @@
         <!-- svelte-ignore a11y_label_has_associated_control -->
         <label class="form-label">
           Tags
-          <span title="Specify one or more tags that apply to this game or project.  Tags are auto-completed on known tags.  Tags can be removed by pressing the &quot;x&quot;.">
+          <span title="Specify one or more tags that apply to this game or project. Tags are auto-completed on known tags.">
             <svg class="svg-icon">
               <use xlink:href="#circle-question"></use>
             </svg>
