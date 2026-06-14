@@ -294,7 +294,7 @@
       <div class="col-12">
         <label for="game_title_input" class="form-label">
           Title
-          <span title="Specify the title of the game (or similar) that this prject implements a Vassal module for.">
+          <span title="Specify the title of the game (or similar) that this project is for.">
             <svg class="svg-icon">
               <use xlink:href="#circle-question"></use>
             </svg>
