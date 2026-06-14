@@ -338,7 +338,7 @@
       <div class="col-4">
         <label for="game_year_input" class="form-label">
           Year
-          <span title="Specify the year the game was first published by the chosen publisher.  The year should be a positive whole number.">
+          <span title="Specify the year the game was first published by the chosen publisher.">
             <svg class="svg-icon">
               <use xlink:href="#circle-question"></use>
             </svg>
