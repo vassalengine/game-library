@@ -177,11 +177,11 @@
           </button>
         </form>
         <div class="btn btn-link ms-auto">
-          <a href="https://commonmark.org/help/" target="_blank">
-            <svg class="svg-icon edit_icon pe-1 fs-2 align-middle">
+          <a href="https://commonmark.org/help/" target="_blank" class="d-flex gap-1">
+            <svg class="svg-icon edit_icon fs-2">
               <use xlink:href="#markdown"></use>
             </svg>
-            <span class="small">Markdown help</span>
+            <div class="small">Markdown help</div>
           </a>
         </div>
       </div>
