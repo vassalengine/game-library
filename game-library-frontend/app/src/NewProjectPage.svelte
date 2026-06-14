@@ -114,7 +114,7 @@
           <label for="project_name_input"
                  class="form-label">
             Project name
-            <span title="Give your project a name.  The name must be at least 5 characters long, but no longer than 64 characters.  The name cannot contain leading, trailing, or consecutive whitespace. The name must only contain letters, numbers, punctuation, separators, and marks.   The name should reflect the title of the game for which the project is for, and should also contain your username. For example &quot;the_greatest_game_of_all_janedoe&quot;. The project name cannot be changed later on (except by administrators).">
+            <span title="Give your project a name. The name must be at least 5 characters, but no more than 64 characters in length. The name must not contain leading, trailing, or consecutive whitespace. The name must contain only letters, numbers, punctuation, separators, and marks. The project name will appear on the project page and in the URL for the project page. You may wish to choose a name which reflects the title of the game your project is for, and possibly include something like your username, to distinguish your project from other projects for the same game. E.g., &quot;the_greatest_game_of_all_janedoe&quot;. You cannot change the project name once set. Choose wisely.">
               <svg class="svg-icon">
                 <use xlink:href="#circle-question"></use>
               </svg>
@@ -127,7 +127,7 @@
           <label for="game_title_input"
                  class="form-label">
             Game title
-            <span title="Specify the title of the game for which you are creating a project.  The title should be as it is listed on BoardGameGeek.com.  The game title can be edited later on.">
+            <span title="Specify the title of the game for which you are creating a project. The game title is editable later.">
               <svg class="svg-icon">
                 <use xlink:href="#circle-question"></use>
               </svg>
