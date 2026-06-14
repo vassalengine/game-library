@@ -176,12 +176,11 @@
         </button>
         <div class="ps-3">
           <a href="https://commonmark.org/help/" target="_blank">
-            <svg class="svg-icon">
+            <svg class="svg-icon edit-icon pe-1 fs-2 align-middle">
               <use xlink:href="#markdown"></use>
             </svg>
-            Markdown
+            Markdown help
           </a>
-          supported
         </div>
       </form>
     </div>
