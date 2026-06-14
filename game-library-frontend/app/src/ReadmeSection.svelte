@@ -177,7 +177,7 @@
           </button>
         </form>
         <div class="btn btn-link ms-auto">
-          <a href="https://commonmark.org/help/" target="_blank" class="d-flex gap-1">
+          <a href="https://commonmark.org/help/" target="_blank" class="link-secondary d-flex gap-1">
             <svg class="svg-icon edit_icon fs-2">
               <use xlink:href="#markdown"></use>
             </svg>
