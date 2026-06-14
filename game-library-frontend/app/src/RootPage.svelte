@@ -66,7 +66,7 @@ article li {
 <h2>Concepts</h2>
 </header>
 
-<p>The Module Library is hierarchical</p>
+<p>The Module Library is hierarchical:</p>
 <ul>
 
 <li>Pages are projects.
