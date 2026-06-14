@@ -182,7 +182,7 @@
             Markdown
           </a>
           supported
-        </span>
+        </div>
       </form>
     </div>
   </div>
