@@ -273,7 +273,7 @@
         <div id="box_image_delete_overlay">
           <button type="button"
                   aria-label="Clear"
-                  title="Remove the game image"
+                  title="Remove the game box image"
                   onclick={clearImage}>
             <svg class="svg-icon"><use xlink:href="#xmark"></use></svg>
           </button>
