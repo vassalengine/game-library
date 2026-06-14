@@ -367,7 +367,7 @@
                step="1"
                name="game_players_max"
                class="form-control"
-               title="The largest number of players that can play this game. IF there is no upper limit, then put in a very large number. If this is a stricly solitaire game, set this to 1, and leave the least number of players blank. Leaving this field blank will set the number of players to the specific value specified in the least number of players."
+               title="The greatest number of players who can play this game. Leave this blank to specify no maximum."
                oninput={validatePlayersMax} bind:value={players_max}>
       </div>
       <div class="col-3">
