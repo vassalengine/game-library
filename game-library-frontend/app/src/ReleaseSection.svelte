@@ -327,7 +327,7 @@
         <button class="btn btn-primary p-1 mx-1 rounded-0"
                 type="button"
                 aria-label="Cancel"
-                title="Cancel the on-going file upload"
+                title="Cancel the file upload in progress"
                 onclick={cancelUpload}>
           <svg class="svg-icon">
             <use xlink:href="#xmark"></use>
