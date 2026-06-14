@@ -12,10 +12,6 @@
     ums_url,
     returnto
   } = $props();
-
-  function createProject(event) {
-     window.open("/library/new");
-  }
 </script>
 
 <svelte:head>
@@ -97,12 +93,7 @@ article li {
 
 {#if user_info}
 <center>
-  <button class="btn btn-primary p-2 message-button"
-          type="button"
-          title="Press to create a new project"
-          onclick={createProject}>
-    <span class="d-button-label">Create a new project</span>
-  </button>
+  <a class="btn btn-primary p-2 message-button" role="button" href="{base_url}/new">Create a new project</a>
 </center>  
 {/if}
 
