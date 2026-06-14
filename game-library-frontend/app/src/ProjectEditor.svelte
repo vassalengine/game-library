@@ -25,7 +25,7 @@
     <form action="" onsubmit={submitEdit} onformdata={fixupData}>
       <label for="owners_input" class="form-label">
         Owners
-        <span title="Add or remove owners of a project.  Project owners can ediit the project, add new packages, releases, and upload files to the project. Only owners may add or remove other owners.">
+        <span title="Add or remove owners of a project. Project owners can edit the project, add new packages and releases, and upload files. Owners may add or remove other owners.">
            <svg class="svg-icon">
             <use xlink:href="#circle-question"></use>
           </svg>
