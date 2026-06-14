@@ -55,7 +55,7 @@
       {#if players.users.includes(username)}
     <button class="btn btn-primary p-1 mx-1 rounded-0"
             type="button" aria-label="Remove"
-            title="Remove yourself from the player list"
+            title="Remove yourself from the players list"
             onclick={removePlayer}>
       <svg class="svg-icon">
         <use xlink:href="#user-minus"></use>
@@ -65,7 +65,7 @@
     <button class="btn btn-primary p-1 mx-1 rounded-0"
             type="button"
             aria-label="Add"
-            title="Add yourself to the player list"
+            title="Add yourself to the players list"
             onclick={addPlayer}>
       <svg class="svg-icon">
         <use xlink:href="#user-plus"></use>
