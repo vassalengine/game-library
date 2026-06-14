@@ -51,7 +51,7 @@
       <use xlink:href="#user-group"></use>
     </svg>
     Players
-    {#if !editing && username} -->
+    {#if !editing && username}
       {#if players.users.includes(username)}
     <button class="btn btn-primary p-1 mx-1 rounded-0"
             type="button" aria-label="Remove"
