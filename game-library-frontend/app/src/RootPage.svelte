@@ -75,7 +75,7 @@ article li {
         <li>Packages contain releases.
           <ul>
             <li>Releases have version numbers.</li>
-            <li>Release version numbers follow the <a href="https://semver.org">Semantic Versioning</a> format, which is <code>x.y.z</code> for normal releases.</li> 
+            <li>Release version numbers follow the <a href="https://semver.org">Semantic Versioning</a> format, which is <code>x.y.z</code> for normal releases.</li>
             <li>Releases contain files.
               <ul>
                 <li>A newly-uploaded module file (<code>.vmod</code>) <i>must</i> have a version number that matches the release it is uploaded to.</li>
