@@ -111,11 +111,40 @@
     <div class="container">
       <div class="row">
         <form action="" onsubmit={submitEdit}>
-          <label for="project_name_input" class="form-label">Project name</label>
-          <input id="project_name_input" type="text" name="project_name" class="form-control" required oninput={validateProjectName}>
-          <label for="game_title_input" class="form-label">Game title</label>
-          <input id="game_title_input" type="text" name="game_title" class="form-control" required>
-          <button class="btn btn-primary p-1 mx-1 rounded-0" type="submit" aria-label="Submit"><svg class="svg-icon"><use xlink:href="#check"></use></svg></button>
+          <label for="project_name_input"
+                 class="form-label">
+            Project name
+            <span title="Give your project a name. The name must be at least 5 characters, but no more than 64 characters in length. The name must not contain leading, trailing, or consecutive whitespace. The name must contain only letters, numbers, punctuation, separators, and marks. The project name will appear on the project page and in the URL for the project page. You may wish to choose a name which reflects the title of the game your project is for, and possibly include something like your username, to distinguish your project from other projects for the same game. E.g., &quot;the_greatest_game_of_all_janedoe&quot;. You cannot change the project name once set. Choose wisely.">
+              <svg class="svg-icon">
+                <use xlink:href="#circle-question"></use>
+              </svg>
+            </span>
+          </label>
+          <input id="project_name_input"
+                 type="text" name="project_name"
+                 class="form-control"
+                 required oninput={validateProjectName}>
+          <label for="game_title_input"
+                 class="form-label">
+            Game title
+            <span title="Specify the title of the game for which you are creating a project. The game title is editable later.">
+              <svg class="svg-icon">
+                <use xlink:href="#circle-question"></use>
+              </svg>
+            </span>
+          </label>
+          <input id="game_title_input"
+                 type="text"
+                 name="game_title"
+                 class="form-control" required>
+          <button class="btn btn-primary p-1 mx-1 rounded-0"
+                  type="submit"
+                  title="Create the project"
+                  aria-label="Submit">
+            <svg class="svg-icon">
+              <use xlink:href="#check"></use>
+            </svg>
+          </button>
         </form>
       </div>
     </div>

@@ -274,8 +274,15 @@
       <div class="col">
         <h1 class="">
           {proj.game.title}
-          <button class="edit_button" class:is_editable={!editing && user_is_owner()} type="button" aria-label="Edit" onclick={startEdit}>
-            <svg class="svg-icon edit_icon"><use xlink:href="#pencil"></use></svg>
+          <button class="edit_button"
+                  class:is_editable={!editing && user_is_owner()}
+                  type="button"
+                  aria-label="Edit"
+                  title="Edit the game information"
+                  onclick={startEdit}>
+            <svg class="svg-icon edit_icon">
+              <use xlink:href="#pencil"></use>
+            </svg>
           </button>
         </h1>
         <div class="d-flex flex-wrap gap-3 h5 fw-normal">
