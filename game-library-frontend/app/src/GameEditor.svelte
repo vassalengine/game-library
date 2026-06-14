@@ -355,7 +355,7 @@
                step="1"
                name="game_players_min"
                class="form-control"
-               title="The least number of players this game can be played. If the game can be played single-handed, then this should be 1. Leaving this field blank will set the number of players to the specific value specified in the largest number of players."
+               title="The least number of players who can play the game. Leave this blank to specify no minimum."
                oninput={validatePlayersMin} bind:value={players_min}>
       </div>
       <div class="col-3">
