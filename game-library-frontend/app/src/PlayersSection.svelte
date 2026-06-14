@@ -47,13 +47,30 @@
 {/if}
 <div>
   <h2>
-    <svg class="svg-icon"><use xlink:href="#user-group"></use></svg>
+    <svg class="svg-icon">
+      <use xlink:href="#user-group"></use>
+    </svg>
     Players
-    {#if !editing && username}
+    {#if !editing && username} -->
       {#if players.users.includes(username)}
-    <button class="btn btn-primary p-1 mx-1 rounded-0" type="button" aria-label="Remove" onclick={removePlayer}><svg class="svg-icon"><use xlink:href="#user-minus"></use></svg></button>
+    <button class="btn btn-primary p-1 mx-1 rounded-0"
+            type="button" aria-label="Remove"
+            title="Remove yourself from the player list"
+            onclick={removePlayer}>
+      <svg class="svg-icon">
+        <use xlink:href="#user-minus"></use>
+      </svg>
+    </button>
       {:else}
-    <button class="btn btn-primary p-1 mx-1 rounded-0" type="button" aria-label="Add" onclick={addPlayer}><svg class="svg-icon"><use xlink:href="#user-plus"></use></svg></button>
+    <button class="btn btn-primary p-1 mx-1 rounded-0"
+            type="button"
+            aria-label="Add"
+            title="Add yourself to the player list"
+            onclick={addPlayer}>
+      <svg class="svg-icon">
+        <use xlink:href="#user-plus"></use>
+      </svg>
+    </button>
       {/if}
     {/if}
   </h2>

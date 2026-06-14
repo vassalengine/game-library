@@ -258,13 +258,23 @@
 <div>
   <form id="game_section_form" action="" onsubmit={submitEdit}>
     <div class="float-left my-2 ms-2 me-3" class:no_image={!box_img}>
-      <label id="box_image_label" for="box_image_input" ondragenter={handleDragEnter} ondragover={handleDragOver} ondrop={handleDrop}>
-        <img id="box_image" class="rounded border img-fluid" src={box_img} alt="box cover">
+      <label id="box_image_label"
+             for="box_image_input"
+             ondragenter={handleDragEnter}
+             ondragover={handleDragOver}
+             ondrop={handleDrop}>
+        <img id="box_image"
+             class="rounded border img-fluid"
+             src={box_img}
+             alt="box cover">
         <div id="box_image_none" class="rounded border">
           <div>no image</div>
         </div>
         <div id="box_image_delete_overlay">
-          <button type="button" aria-label="Clear" onclick={clearImage}>
+          <button type="button"
+                  aria-label="Clear"
+                  title="Remove the game image"
+                  onclick={clearImage}>
             <svg class="svg-icon"><use xlink:href="#xmark"></use></svg>
           </button>
         </div>
@@ -273,58 +283,163 @@
         </div>
       </label>
       <input type="hidden" name="box_image_clear" value={box_img_clear}>
-      <input id="box_image_input" type="file" name="box_image" accept="image/png, image/jpeg, image/svg+xml, image/webp, image/avif" onchange={selectImage}>
+      <input id="box_image_input"
+             type="file"
+             name="box_image"
+             accept="image/png, image/jpeg, image/svg+xml, image/webp, image/avif"
+             title="Upload an image for the project"
+             onchange={selectImage}>
     </div>
     <div class="row">
       <div class="col-12">
-        <label for="game_title_input" class="form-label">Title</label>
-        <input id="game_title_input" type="text" name="game_title" class="form-control" required bind:value={game_title}>
+        <label for="game_title_input" class="form-label">
+          Title
+          <span title="Specify the title of the game (or similar) that this prject implements a Vassal module for.">
+            <svg class="svg-icon">
+              <use xlink:href="#circle-question"></use>
+            </svg>
+          </span>
+        </label>
+        <input id="game_title_input"
+               type="text"
+               name="game_title"
+               class="form-control"
+               required bind:value={game_title}>
       </div>
       <div class="col-12">
-        <label for="game_title_sort_key_input" class="form-label">Title Sort Key <span title="If the automatically generated sort key is incorrect for your game title, please raise a flag on the project so an admin may correct it."><svg class="svg-icon"><use xlink:href="#info-circle"></use></svg></span></label>
-        <input id="game_title_sort_key_input" type="text" name="game_title_sort_key" class="form-control" readonly disabled value={sortKeyFor(game_title.trim())}>
+        <label for="game_title_sort_key_input"
+               class="form-label">
+          Title Sort Key
+          <span title="If the automatically generated sort key is incorrect for your game title, please raise a flag on the project so an admin may correct it.">
+            <svg class="svg-icon">
+              <use xlink:href="#circle-question"></use>
+            </svg>
+          </span>
+        </label>
+        <input id="game_title_sort_key_input"
+               type="text"
+               name="game_title_sort_key"
+               class="form-control"
+               readonly disabled value={sortKeyFor(game_title.trim())}>
       </div>
       <div class="col-8">
         <!-- svelte-ignore a11y_label_has_associated_control -->
-        <label class="form-label">Publisher</label>
+        <label class="form-label">
+          Publisher
+          <span title="Specify the publisher, if any, of the game that this project is for.  Publisher names are auto-completed on known publisers.">
+            <svg class="svg-icon">
+              <use xlink:href="#circle-question"></use>
+            </svg>
+          </span>
+        </label>
         <PublisherInput {client} publisher={proj.game.publisher} bind:item={publisher_select} bind:cache={publishers_cache} allowNew={true} />
         <input type="hidden" name="game_publisher" value={publisher_select?.publisher ?? ''} />
       </div>
       <div class="col-4">
-        <label for="game_year_input" class="form-label">Year</label>
+        <label for="game_year_input" class="form-label">
+          Year
+          <span title="Specify the year the game was first published by the chosen publisher.  The year should be a positive whole number.">
+            <svg class="svg-icon">
+              <use xlink:href="#circle-question"></use>
+            </svg>
+          </span>
+        </label>
         <input id="game_year_input" type="text" name="game_year" class="form-control" value={proj.game.year}>
       </div>
       <div class="col-3">
-        <label for="game_players_min_input" class="form-label">Minimum Players</label>
-        <input id="game_players_min_input" type="number" min="1" step="1" name="game_players_min" class="form-control" oninput={validatePlayersMin} bind:value={players_min}>
+        <label for="game_players_min_input"
+               class="form-label">Minimum Players</label>
+        <input id="game_players_min_input"
+               type="number"
+               min="1"
+               step="1"
+               name="game_players_min"
+               class="form-control"
+               title="The least number of players this game can be played. If the game can be played single-handed, then this should be 1. Leaving this field blank will set the number of players to the specific value specified in the largest number of players."
+               oninput={validatePlayersMin} bind:value={players_min}>
       </div>
       <div class="col-3">
-        <label for="game_players_max_input" class="form-label">Maximum Players</label>
-        <input id="game_players_max_input" type="number" min="1" step="1" name="game_players_max" class="form-control" oninput={validatePlayersMax} bind:value={players_max}>
+        <label for="game_players_max_input"
+               class="form-label">Maximum Players</label>
+        <input id="game_players_max_input"
+               type="number"
+               min="1"
+               step="1"
+               name="game_players_max"
+               class="form-control"
+               title="The largest number of players that can play this game. IF there is no upper limit, then put in a very large number. If this is a stricly solitaire game, set this to 1, and leave the least number of players blank. Leaving this field blank will set the number of players to the specific value specified in the least number of players."
+               oninput={validatePlayersMax} bind:value={players_max}>
       </div>
       <div class="col-3">
-        <label for="game_length_min_input" class="form-label">Minimum Length</label>
-        <input id="game_length_min_input" type="number" min="1" step="1" name="game_length_min" class="form-control" oninput={validateLengthMin} bind:value={length_min}>
+        <label for="game_length_min_input"
+               class="form-label">Minimum Length</label>
+        <input id="game_length_min_input"
+               type="number"
+               min="1"
+               step="1"
+               name="game_length_min"
+               class="form-control"
+               title="An estimate of the least number of minutes it will take to complete a round of this game."
+               oninput={validateLengthMin} bind:value={length_min}>
       </div>
       <div class="col-3">
-        <label for="game_length_max_input" class="form-label">Maximum Length</label>
-        <input id="game_length_max_input" type="number" min="1" step="1" name="game_length_max" class="form-control" oninput={validateLengthMax} bind:value={length_max}>
+        <label for="game_length_max_input"
+               class="form-label">Maximum Length</label>
+        <input id="game_length_max_input"
+               type="number"
+               min="1"
+               step="1"
+               name="game_length_max"
+               class="form-control"
+               title="An estimate of the largest number of minutes it will take to complete a round of this game. If a single session of the game can go on forever, then this field should be left blank."
+               oninput={validateLengthMax} bind:value={length_max}>
       </div>
       <div class="col-12">
         <!-- svelte-ignore a11y_label_has_associated_control -->
-        <label class="form-label">Tags</label>
+        <label class="form-label">
+          Tags
+          <span title="Specify one or more tags that apply to this game or project.  Tags are auto-completed on known tags.  Tags can be removed by pressing the &quot;x&quot;.">
+            <svg class="svg-icon">
+              <use xlink:href="#circle-question"></use>
+            </svg>
+          </span>
+        </label>
         <TagsInput {client} tags={proj.tags} bind:items={tags_select} bind:cache={tags_cache} />
         {#each tags_select as t (t.tag)}
         <input type="hidden" name="tag" value={t.tag} />
         {/each}
       </div>
       <div class="col-12">
-        <label for="description_input" class="form-label">Description</label>
-        <input id="description_input" type="text" name="description" class="form-control" value={proj.description}>
+        <label for="description_input"
+               class="form-label">
+          Description
+          <span title="Write a short description of the game and project.  This will be shown as a lead when searching for projects.  Note that the lead will be truncated to 256 characters.">
+            <svg class="svg-icon">
+              <use xlink:href="#circle-question"></use>
+            </svg>
+          </span>
+        </label>
+        <input id="description_input"
+               type="text"
+               name="description"
+               class="form-control"
+               value={proj.description}>
       </div>
       <div class="col-12">
-        <button type="submit" aria-label="Submit" class="btn btn-primary"><svg class="svg-icon"><use xlink:href="#check"></use></svg></button>
-        <button type="button" aria-label="Cancel" class="btn btn-primary" onclick={cancelEdit}><svg class="svg-icon"><use xlink:href="#xmark"></use></svg></button>
+        <button type="submit"
+                aria-label="Submit"
+                class="btn btn-primary">
+          <svg class="svg-icon">
+            <use xlink:href="#check"></use>
+          </svg>
+        </button>
+        <button type="button"
+                aria-label="Cancel"
+                class="btn btn-primary"
+                onclick={cancelEdit}>
+          <svg class="svg-icon">
+            <use xlink:href="#xmark"></use>
+          </svg></button>
       </div>
     </div>
   </form>

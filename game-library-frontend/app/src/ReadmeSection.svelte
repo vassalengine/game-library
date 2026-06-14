@@ -128,25 +128,61 @@
   <h2>
     <svg class="svg-icon"><use xlink:href="#info-circle"></use></svg>
     Readme
-    <button class="edit_button" class:is_editable={!editing && user_is_owner()} type="button" aria-label="Edit" onclick={startEdit}>
-      <svg class="svg-icon edit_icon"><use xlink:href="#pencil"></use></svg>
+    <button class="edit_button"
+            class:is_editable={!editing && user_is_owner()}
+            type="button"
+            aria-label="Edit"
+            title="Edit the project long text"
+            onclick={startEdit}>
+      <svg class="svg-icon edit_icon">
+        <use xlink:href="#pencil"></use>
+      </svg>
     </button>
   </h2>
 {#if edit}
   <div class="container">
     <div class="row">
       <div class="col-6">
-        <textarea id="readme_source" class="source full-height" bind:value={source}></textarea>
-      </div>
+        <textarea id="readme_source"
+                  class="source full-height"
+                  bind:value={source}>
+        </textarea>
+      </div>      
       <section class="col-6">
 <!-- TODO: do we need to sanitize here? -->
-        <div id="readme_result" class="result full-height">{@html md.render(source)}</div>
+        <div id="readme_result"
+             class="result full-height">{@html md.render(source)}</div>
       </section>
     </div>
     <div class="row">
       <form id="readme_form" action="" onsubmit={submitEdit}>
-        <button type="submit" aria-label="Submit" class="btn btn-primary"><svg class="svg-icon"><use xlink:href="#check"></use></svg></button>
-        <button id="cancel" aria-label="Cancel" type="button" class="btn btn-primary" onclick={cancelEdit}><svg class="svg-icon"><use xlink:href="#xmark"></use></svg></button>
+        <button type="submit"
+                aria-label="Submit"
+                title="Save changes to description"
+                class="btn btn-primary">
+          <svg class="svg-icon">
+            <use xlink:href="#check"></use>
+          </svg>
+        </button>
+        <button id="cancel"
+                aria-label="Cancel"
+                type="button"
+                class="btn btn-primary"
+                title="Cancel edits"
+                onclick={cancelEdit}>
+          <svg class="svg-icon">
+            <use xlink:href="#xmark"></use>
+          </svg>
+        </button>
+        <span style="margin-left: .5em">
+          <a href="https://commonmark.org/help/" target="_blank">
+            <svg class="svg-icon edit_icon">
+              <use xlink:href="#markdown"></use>
+            </svg>
+            MarkDown
+          </a>
+          supported.
+        </span>
       </form>
     </div>
   </div>

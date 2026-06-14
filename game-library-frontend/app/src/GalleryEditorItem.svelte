@@ -59,14 +59,22 @@
   <div class="image_inner">
     <img class="figure-img img-fluid img-thumbnail" src="{src}" alt="">
     <div class="image_delete_overlay">
-      <button type="button" aria-label="Delete" onclick={deleteItem}>
-        <svg class="svg-icon"><use xlink:href="#xmark"></use></svg>
+      <button type="button"
+              aria-label="Delete"
+              title="Remove this image from the gallery"
+              onclick={deleteItem}>
+        <svg class="svg-icon">
+          <use xlink:href="#xmark"></use>
+        </svg>
       </button>
     </div>
   </div>
   <figcaption class="figure-caption text-center">
     <input type="hidden" name="id" value={img.id}>
     <input type="hidden" name="filename" value={img.filename}>
-    <input type="text" name="description" value={img.description}>
+    <input type="text"
+           name="description"
+           value={img.description}
+           title="Give a short caption for the image">
   </figcaption>
 </figure>
