@@ -155,34 +155,36 @@
       </section>
     </div>
     <div class="row">
-      <form id="readme_form" action="" onsubmit={submitEdit}>
-        <button type="submit"
-                aria-label="Submit"
-                title="Save changes to readme"
-                class="btn btn-primary">
-          <svg class="svg-icon">
-            <use xlink:href="#check"></use>
-          </svg>
-        </button>
-        <button id="cancel"
-                aria-label="Cancel"
-                type="button"
-                class="btn btn-primary"
-                title="Cancel edits"
-                onclick={cancelEdit}>
-          <svg class="svg-icon">
-            <use xlink:href="#xmark"></use>
-          </svg>
-        </button>
-        <div class="ps-3">
+      <div class="col-6 d-flex">
+        <form id="readme_form" action="" onsubmit={submitEdit}>
+          <button type="submit"
+                  aria-label="Submit"
+                  title="Save changes to readme"
+                  class="btn btn-primary">
+            <svg class="svg-icon">
+              <use xlink:href="#check"></use>
+            </svg>
+          </button>
+          <button id="cancel"
+                  aria-label="Cancel"
+                  type="button"
+                  class="btn btn-primary"
+                  title="Cancel edits"
+                  onclick={cancelEdit}>
+            <svg class="svg-icon">
+              <use xlink:href="#xmark"></use>
+            </svg>
+          </button>
+        </form>
+        <div class="btn btn-link ms-auto">
           <a href="https://commonmark.org/help/" target="_blank">
             <svg class="svg-icon edit_icon pe-1 fs-2 align-middle">
               <use xlink:href="#markdown"></use>
             </svg>
-            <span>Markdown help</span>
+            <span class="small">Markdown help</span>
           </a>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 {:else}
