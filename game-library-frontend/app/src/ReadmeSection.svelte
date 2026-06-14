@@ -174,14 +174,14 @@
             <use xlink:href="#xmark"></use>
           </svg>
         </button>
-        <span style="margin-left: .5em">
+        <div class="ps-3">
           <a href="https://commonmark.org/help/" target="_blank">
-            <svg class="svg-icon edit_icon">
+            <svg class="svg-icon">
               <use xlink:href="#markdown"></use>
             </svg>
             Markdown
           </a>
-          supported.
+          supported
         </span>
       </form>
     </div>
