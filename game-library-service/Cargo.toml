@@ -39,7 +39,7 @@ tokio = { version = "1", features = ["full"] }
 tokio-util = "0.7"
 toml = "1.0"
 tower = { version = "0.5", features = ["limit", "util"] }
-tower-http = { version = "0.6", features = ["compression-br", "compression-deflate", "compression-gzip", "compression-zstd", "cors", "fs", "timeout", "trace"] }
+tower-http = { version = "0.7", features = ["compression-br", "compression-deflate", "compression-gzip", "compression-zstd", "cors", "fs", "timeout", "trace"] }
 tracing = "0.1"
 unicode-ccc = "0.4"
 unicode-normalization = "0.1"
