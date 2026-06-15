@@ -16,7 +16,7 @@
     "@sveltejs/vite-plugin-svelte": "7.1.2",
     "svelte": "5.55.10",
     "vite": "8.0.16",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.9"
   },
   "dependencies": {
     "svelte-material-ui": "^9"
