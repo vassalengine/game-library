@@ -25,7 +25,7 @@ infer = "0.19"
 itertools = "0.14"
 jsonwebtoken = { version = "10", default-features = false, features = ["aws_lc_rs"] }
 mime = "0.3"
-num-bigint = "0.4.6"
+num-bigint = "0.5.1"
 regex = "1"
 rust-s3 = "0.37"
 semver = "1"
