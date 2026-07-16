@@ -21,7 +21,7 @@ glc = { path = "../game-library-common" }
 hex = "0.4"
 http = "1.3"
 http-body-util = "0.1"
-infer = "0.19"
+infer = "0.22"
 itertools = "0.14"
 jsonwebtoken = { version = "10", default-features = false, features = ["aws_lc_rs"] }
 mime = "0.3"
