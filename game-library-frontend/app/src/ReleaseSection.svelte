@@ -97,6 +97,21 @@
     error = null;
   }
 
+  function safe_filename(f) {
+    const BAD_CAHR = /[\x00-\x1F\x7F-\x9F"'*/:<>?|\\]/;
+    const WIN_RESERVED = /^(CON|PRN|AUX|NUL|(COM|LPT)[1-9])($|\.)/i;
+
+    return !(
+      f === "" ||           // empty
+      f.length > 255 ||     // overlong
+      f !== f.trim() ||     // leading, trailing whitespace
+      f.endsWith('.') ||    // trailing periods (Windows)
+      f.includes('..') ||   // parent directory
+      BAD_CAHR.test(f) ||   // control, reserved characters
+      WIN_RESERVED.test(f)  // reserved filenames (Windows)
+    );
+  }
+
   function extension(s, delim) {
     const i = s.lastIndexOf('.');
     return i != -1 ? s.substr(i + 1) : '';
@@ -107,6 +122,10 @@
 
     if (event.target.files.length === 1) {
       const file = event.target.files[0];
+
+      if (!safe_filename(file.name)) {
+        msg = "Invalid filename.";
+      }
 
       const ext = extension(file.name);
 
